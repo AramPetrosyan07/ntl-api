@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import cors from "cors";
 import "dotenv/config";
 import * as CustomerController from "./controllers/CustomerController.js";
 import * as LoadController from "./controllers/LoadController.js";
@@ -24,8 +25,20 @@ mongoose
   .catch(() => console.log("DB error"));
 
 const app = express();
+app.use(cors());
 
 app.use(express.json());
+
+app.get("/test", async (req, res) => {
+  try {
+    res.json("working");
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Не удалось авторизаваться",
+    });
+  }
+});
 
 app.post(
   "/auth/register",
