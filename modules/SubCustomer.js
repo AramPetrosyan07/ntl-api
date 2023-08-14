@@ -18,14 +18,14 @@ const SubCustomerSchema = new mongoose.Schema(
     phoneNumber: {
       type: String,
       unique: true,
+      sparse: true,
     },
     userType: {
       type: String,
       required: true,
     },
-    companyName: {
-      type: mongoose.Schema.Types.ObjectId,
-    },
+    parent: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
+
     passwordHash: {
       type: String,
       required: true,
@@ -37,3 +37,19 @@ const SubCustomerSchema = new mongoose.Schema(
 );
 
 export default mongoose.model("SubCustomer", SubCustomerSchema);
+
+let s1 = {
+  id: "z",
+  name: "z",
+  parent: 1,
+};
+let s2 = {
+  id: "z",
+  name: "z",
+  parent: 1,
+};
+let s3 = {
+  id: "zasas",
+  name: "zeegfeffef",
+  parent: 1,
+};

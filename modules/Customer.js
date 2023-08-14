@@ -33,6 +33,10 @@ const CustomersSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    subCustomers: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "SubCustomer" },
+    ],
+
     //
     address: {
       type: String,
@@ -58,10 +62,7 @@ const CustomersSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
-    // teamMembers: {
-    //   type: Array,
-    //   default: [],
-    // },
+
     isVeryfied: {
       type: Boolean,
       default: false,

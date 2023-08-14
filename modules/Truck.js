@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const LoadSchema = new mongoose.Schema(
+const TruckSchema = new mongoose.Schema(
   {
     date: {
       type: String,
@@ -20,18 +20,15 @@ const LoadSchema = new mongoose.Schema(
     },
     delivery: {
       type: String,
-      required: true,
     },
     distance: {
       type: Number,
-      required: true,
     },
     length: {
       type: Number,
     },
     weight: {
       type: Number,
-      required: true,
     },
     rate: {
       type: Number,
@@ -40,14 +37,9 @@ const LoadSchema = new mongoose.Schema(
       type: String,
       default: "open",
     },
-    customerInfo: {
+    driver: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Customer",
-    },
-
-    subCustomerInfo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "SubCustomer",
+      ref: "Driver",
     },
   },
   {
@@ -55,4 +47,4 @@ const LoadSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("Load", LoadSchema);
+export default mongoose.model("Truck", TruckSchema);

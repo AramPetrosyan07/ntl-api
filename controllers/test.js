@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import CustomersModel from "../modules/Customer.js";
-import SubCustomersModel from "../modules/SubCustomer.js";
 import DriverModel from "../modules/Driver.js";
+import SubCustomersModel from "../modules/SubCustomer.js";
 
 export const register = async (req, res) => {
   try {
@@ -28,7 +28,9 @@ export const register = async (req, res) => {
       passwordHash: hash,
     };
 
-    let doc = null;
+    console.log(info);
+
+    const doc = null;
     if (req.body.userType === "carrier") {
       doc = new DriverModel(info);
     } else if (req.body.userType === "customer") {
@@ -44,6 +46,7 @@ export const register = async (req, res) => {
       token,
     });
   } catch (err) {
+    console.log(err);
     if (err?.keyValue?.email) {
       res.status(406).json({
         message: "Email already exists.",
@@ -138,15 +141,12 @@ export const login = async (req, res) => {
   try {
     const sliceOne = await CustomersModel.findOne({ email: req.body.email });
     const sliceTwo = await SubCustomersModel.findOne({ email: req.body.email });
-    const sliceThree = await DriverModel.findOne({ email: req.body.email });
     let user = null;
 
     if (sliceOne) {
       user = sliceOne;
     } else if (sliceTwo) {
       user = sliceTwo;
-    } else if (sliceThree) {
-      user = sliceThree;
     }
 
     if (!user) {

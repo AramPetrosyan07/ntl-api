@@ -30,6 +30,7 @@ const DriverSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    trucks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Truck" }],
   },
   {
     timestamps: true,
