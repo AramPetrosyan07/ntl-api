@@ -18,6 +18,7 @@ const DriverSchema = new mongoose.Schema(
     phoneNumber: {
       type: String,
       unique: true,
+      sparse: true,
     },
     userType: {
       type: String,

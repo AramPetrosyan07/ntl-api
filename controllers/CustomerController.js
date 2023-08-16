@@ -57,6 +57,7 @@ export const register = async (req, res) => {
         message: "Phone number already exists.",
       });
     } else {
+      console.log(err);
       res.status(500).json({
         message: "An error occurred during registration.",
       });
