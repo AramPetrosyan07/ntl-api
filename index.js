@@ -25,7 +25,7 @@ mongoose
   .catch(() => console.log("DB error"));
 
 const app = express();
-// app.use(cors());
+app.use(cors());
 
 app.use(express.json());
 
