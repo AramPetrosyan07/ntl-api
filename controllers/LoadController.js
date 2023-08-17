@@ -12,6 +12,8 @@ export const addNewLoad = async (req, res) => {
       length: req.body.length,
       weight: req.body.weight,
       rate: req.body.rate,
+      commodity: req.body.commodity,
+      comment: req.body.comment,
       customerInfo: req.body.parent,
       subCustomerInfo: req.userId,
     });
@@ -106,6 +108,8 @@ export const updateLoad = async (req, res) => {
       length: req.body.length,
       weight: req.body.weight,
       rate: req.body.rate,
+      commodity: req.body.commodity,
+      comment: req.body.comment,
       status: req.body.status,
     };
 

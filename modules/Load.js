@@ -36,6 +36,12 @@ const LoadSchema = new mongoose.Schema(
     rate: {
       type: Number,
     },
+    commodity: {
+      type: String,
+    },
+    comment: {
+      type: String,
+    },
     status: {
       type: String,
       default: "open",

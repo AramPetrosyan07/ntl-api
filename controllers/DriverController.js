@@ -13,6 +13,7 @@ export const addTrick = async (req, res) => {
       length: req.body.length,
       weight: req.body.weight,
       rate: req.body.rate,
+      comment: req.body.comment,
 
       driver: req.userId,
     });
@@ -90,6 +91,7 @@ export const updateTruck = async (req, res) => {
       length: req.body.length,
       weight: req.body.weight,
       rate: req.body.rate,
+      comment: req.body.comment,
     };
 
     let response = await TruckModel.findOneAndUpdate(

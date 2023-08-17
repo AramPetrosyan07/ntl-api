@@ -33,6 +33,10 @@ const TruckSchema = new mongoose.Schema(
     rate: {
       type: Number,
     },
+
+    comment: {
+      type: String,
+    },
     status: {
       type: String,
       default: "open",
