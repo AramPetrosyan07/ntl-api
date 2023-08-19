@@ -11,7 +11,9 @@ export const register = async (req, res) => {
         email: req.body.email,
       });
       if (hasEmail) {
-        return res.status(404).json({ message: "Неверный email" });
+        return res
+          .status(404)
+          .json({ message: "Այս էլ. հասցեով օգտատեր գոյություն ունի" });
       }
     }
 
@@ -46,20 +48,20 @@ export const register = async (req, res) => {
   } catch (err) {
     if (err?.keyValue?.email) {
       res.status(406).json({
-        message: "Email already exists.",
+        message: "Այս էլ. հասցեով օգտատեր գոյություն ունի",
       });
     } else if (err?.keyValue?.companyName) {
       res.status(406).json({
-        message: "Company name already exists.",
+        message: "Այս ընկերության անունով օգտատեր գոյություն ունի",
       });
     } else if (err?.keyValue?.phoneNumber) {
       res.status(406).json({
-        message: "Phone number already exists.",
+        message: "Այս հեռախոսահամարով օգտատեր գոյություն ունի",
       });
     } else {
-      console.log(err);
       res.status(500).json({
-        message: "An error occurred during registration.",
+        message:
+          "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
       });
     }
   }
@@ -69,7 +71,9 @@ export const registerSub = async (req, res) => {
   try {
     const hasEmail = await CustomersModel.findOne({ email: req.body.email });
     if (hasEmail) {
-      return res.status(404).json({ message: "Неверный email" });
+      return res
+        .status(404)
+        .json({ message: "Այս էլ. հասցեով օգտատեր գոյություն ունի" });
     }
 
     const password = req.body.password;
@@ -93,27 +97,24 @@ export const registerSub = async (req, res) => {
     );
     res.json(user);
   } catch (err) {
-    if (err.keyValue.email) {
+    if (err?.keyValue?.email) {
       res.status(406).json({
-        message: "Email already exists.",
+        message: "Այս էլ. հասցեով օգտատեր գոյություն ունի",
       });
-    } else if (err.keyValue.companyName) {
+    } else if (err?.keyValue?.companyName) {
       res.status(406).json({
-        message: "Company name already exists.",
+        message: "Այս ընկերության անունով օգտատեր գոյություն ունի",
       });
-    } else if (err.keyValue.phoneNumber) {
+    } else if (err?.keyValue?.phoneNumber) {
       res.status(406).json({
-        message: "Phone number already exists.",
+        message: "Այս հեռախոսահամարով օգտատեր գոյություն ունի",
       });
     } else {
       res.status(500).json({
-        message: "An error occurred during registration.",
+        message:
+          "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
       });
     }
-    console.log(err);
-    res.status(500).json({
-      message: "Не",
-    });
   }
 };
 
@@ -128,9 +129,9 @@ export const getCustomersSubs = async (req, res) => {
 
     res.json(schemeA);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
-      message: "Не",
+      message:
+        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
     });
   }
 };
@@ -151,7 +152,7 @@ export const login = async (req, res) => {
     }
 
     if (!user) {
-      return res.status(404).json({ message: "Неверный логин или пароль" });
+      return res.status(404).json({ message: "Սխալ էլ. հասցե կամ գաղտնաբառ" });
     }
 
     const isValidPass = await bcrypt.compare(
@@ -161,7 +162,7 @@ export const login = async (req, res) => {
 
     if (!isValidPass) {
       return res.status(403).json({
-        message: "Неверный логин или пароль",
+        message: "Սխալ էլ. հասցե կամ գաղտնաբառ",
       });
     }
 
@@ -173,9 +174,9 @@ export const login = async (req, res) => {
       token,
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
-      message: "Не удалось авторизаваться",
+      message:
+        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
     });
   }
 };
@@ -183,7 +184,7 @@ export const login = async (req, res) => {
 export const changePass = async (req, res) => {
   try {
     if (req.body.newPasswordOne !== req.body.newPasswordTwo) {
-      return res.status(404).json({ message: "anhamapatasxan new password" });
+      return res.status(404).json({ message: "Անհամապատասխան գաղտնաբառ" });
     }
 
     const sliceOne = await CustomersModel.findOne({ email: req.body.email });
@@ -197,7 +198,7 @@ export const changePass = async (req, res) => {
     }
 
     if (!user) {
-      return res.status(404).json({ message: "invalid email" });
+      return res.status(404).json({ message: "Սխալ էլ. հասցե" });
     }
 
     const isValidPass = await bcrypt.compare(
@@ -207,7 +208,7 @@ export const changePass = async (req, res) => {
 
     if (!isValidPass) {
       return res.status(401).json({
-        message: "Неверный  пароль",
+        message: "Սխալ գաղտնաբառ",
       });
     }
 
@@ -225,9 +226,9 @@ export const changePass = async (req, res) => {
       token,
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
-      message: "Не удалось авторизаваться",
+      message:
+        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
     });
   }
 };
@@ -238,7 +239,7 @@ export const getMe = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({
-        message: "Пользователь не найден",
+        message: "Օգտատեր չի գտնվել",
       });
     }
 
@@ -246,9 +247,9 @@ export const getMe = async (req, res) => {
 
     res.json(userData);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
-      message: "Не удалось авторизаваться",
+      message:
+        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
     });
   }
 };
@@ -264,15 +265,15 @@ export const getDetailSub = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({
-        message: "Пользователь не найден",
+        message: "Օգտատեր չի գտնվել",
       });
     }
 
     res.json(user);
   } catch (err) {
-    console.log(err);
     res.status(500).json({
-      message: "Не удалось авторизаваться",
+      message:
+        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
     });
   }
 };
