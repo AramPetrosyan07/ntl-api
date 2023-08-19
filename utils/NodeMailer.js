@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import CustomersModel from "../modules/Customer.js";
 import SubCustomersModel from "../modules/SubCustomer.js";
+import DriverModel from "../modules/Driver.js";
 
 const mailTransporter = nodemailer.createTransport({
   service: "gmail",
@@ -40,15 +41,16 @@ export const RecoverSend = async (req, res) => {
 
     const sliceOne = await CustomersModel.findOne({ email });
     const sliceTwo = await SubCustomersModel.findOne({ email });
+    const sliceThree = await DriverModel.findOne({ email });
 
-    if (!sliceOne && !sliceTwo) {
+    if (!sliceOne && !sliceTwo && !sliceThree) {
       return res.status(404).json({ message: "invalid email" });
     }
 
     const verificationCode = generateVerificationCode();
     const salt = await bcrypt.genSalt(10);
     const token = await bcrypt.hash(email, salt);
-    const expirationTime = Date.now() + 300000;
+    const expirationTime = Date.now() + 120000;
 
     const doc = new RecoverModel({
       token,
@@ -92,7 +94,7 @@ export const RecoverResponse = async (req, res) => {
 
     data.verifyToken = verifyToken;
     data.verify = true;
-    data.expirationTime = Date.now() + 300000;
+    data.expirationTime = Date.now() + 120000;
     await data.save();
 
     res.json({ message: "Verification successful", verifyToken });
@@ -127,12 +129,15 @@ export const PassRecovery = async (req, res) => {
 
     const sliceOne = await CustomersModel.findOne({ email });
     const sliceTwo = await SubCustomersModel.findOne({ email });
+    const sliceThree = await DriverModel.findOne({ email });
 
     let user = null;
 
     if (sliceOne) {
       user = sliceOne;
     } else if (sliceTwo) {
+      user = sliceTwo;
+    } else if (sliceThree) {
       user = sliceTwo;
     }
 
