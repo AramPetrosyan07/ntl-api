@@ -254,9 +254,13 @@ export const getMe = async (req, res) => {
       });
     }
 
+    const token = jwt.sign({ _id: user._id }, "secret123", { expiresIn: "4d" });
     const { passwordHash, ...userData } = user._doc;
 
-    res.json(userData);
+    res.json({
+      ...userData,
+      token,
+    });
   } catch (err) {
     res.status(500).json({
       message:
