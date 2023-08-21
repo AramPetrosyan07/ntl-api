@@ -235,7 +235,18 @@ export const changePass = async (req, res) => {
 
 export const getMe = async (req, res) => {
   try {
-    const user = await CustomersModel.findById(req.userId);
+    const sliceOne = await CustomersModel.findOne(req.userId);
+    const sliceTwo = await SubCustomersModel.findOne(req.userId);
+    const sliceThree = await DriverModel.findOne(req.userId);
+    let user = null;
+
+    if (sliceOne) {
+      user = sliceOne;
+    } else if (sliceTwo) {
+      user = sliceTwo;
+    } else if (sliceThree) {
+      user = sliceThree;
+    }
 
     if (!user) {
       return res.status(404).json({
