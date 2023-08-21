@@ -235,9 +235,9 @@ export const changePass = async (req, res) => {
 
 export const getMe = async (req, res) => {
   try {
-    const sliceOne = await CustomersModel.findOne(req.userId);
-    const sliceTwo = await SubCustomersModel.findOne(req.userId);
-    const sliceThree = await DriverModel.findOne(req.userId);
+    const sliceOne = await CustomersModel.findOne({ _id: req.userId });
+    const sliceTwo = await SubCustomersModel.findOne({ _id: req.userId });
+    const sliceThree = await DriverModel.findOne({ _id: req.userId });
     let user = null;
 
     if (sliceOne) {
@@ -262,6 +262,7 @@ export const getMe = async (req, res) => {
       token,
     });
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       message:
         "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
