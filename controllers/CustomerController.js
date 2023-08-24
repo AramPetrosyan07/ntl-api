@@ -79,7 +79,7 @@ export const register = async (req, res) => {
 
 export const registerSub = async (req, res) => {
   try {
-    if (req.body.newPasswordOne !== req.body.newPasswordTwo) {
+    if (req.body.password !== req.body.repetPassword) {
       return res.status(404).json({ message: "Անհամապատասխան գաղտնաբառ" });
     }
 
@@ -103,7 +103,7 @@ export const registerSub = async (req, res) => {
       }
     }
 
-    const password = req.body.newPasswordOne;
+    const password = req.body.password;
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
 
@@ -117,7 +117,7 @@ export const registerSub = async (req, res) => {
           : req.body.currentUserType === "carrier"
           ? "subCarrier"
           : "",
-      phoneNumber: req.body.phoneNumber,
+      phoneNumber: req.body.phoneNumber ? req.body.phoneNumber : "",
       parent: req.userId,
       passwordHash: hash,
     };
