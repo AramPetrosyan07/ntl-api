@@ -31,6 +31,9 @@ const DriverSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+
+    subCarrier: [{ type: mongoose.Schema.Types.ObjectId, ref: "SubCarrier" }],
+
     trucks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Truck" }],
   },
   {
@@ -38,4 +41,4 @@ const DriverSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("Driver", DriverSchema);
+export default mongoose.model("Carrier", DriverSchema);

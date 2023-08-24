@@ -1,5 +1,5 @@
 import TruckModel from "../modules/Truck.js";
-import DriverModel from "../modules/Driver.js";
+import DriverModel from "../modules/Carrier.js";
 
 export const addTrick = async (req, res) => {
   try {

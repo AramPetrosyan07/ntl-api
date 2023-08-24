@@ -33,9 +33,6 @@ const CustomersSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    subCustomers: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "SubCustomer" },
-    ],
 
     //
     address: {
@@ -67,6 +64,12 @@ const CustomersSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    subCustomers: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "SubCustomer" },
+    ],
+
+    loads: [{ type: mongoose.Schema.Types.ObjectId, ref: "Load" }],
 
     failedLoginAttempts: { type: Number, default: 0 },
     lockoutUntil: { type: Date, default: null },

@@ -2,12 +2,22 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import CustomersModel from "../modules/Customer.js";
 import SubCustomersModel from "../modules/SubCustomer.js";
-import DriverModel from "../modules/Driver.js";
+import SubCarrierModel from "../modules/SubCarrier.js";
+import CarrierModel from "../modules/Carrier.js";
 
 export const register = async (req, res) => {
   try {
     if (req.body.userType === "customer") {
       const hasEmail = await SubCustomersModel.findOne({
+        email: req.body.email,
+      });
+      if (hasEmail) {
+        return res
+          .status(404)
+          .json({ message: "Այս էլ. հասցեով օգտատեր գոյություն ունի" });
+      }
+    } else if (req.body.userType === "carrier") {
+      const hasEmail = await SubCarrierModel.findOne({
         email: req.body.email,
       });
       if (hasEmail) {
@@ -32,7 +42,7 @@ export const register = async (req, res) => {
 
     let doc = null;
     if (req.body.userType === "carrier") {
-      doc = new DriverModel(info);
+      doc = new CarrierModel(info);
     } else if (req.body.userType === "customer") {
       doc = new CustomersModel(info);
     }
@@ -69,32 +79,61 @@ export const register = async (req, res) => {
 
 export const registerSub = async (req, res) => {
   try {
-    const hasEmail = await CustomersModel.findOne({ email: req.body.email });
-    if (hasEmail) {
-      return res
-        .status(404)
-        .json({ message: "Այս էլ. հասցեով օգտատեր գոյություն ունի" });
+    if (req.body.userType === "subCustomer") {
+      const hasEmail = await CustomersModel.findOne({
+        email: req.body.email,
+      });
+      if (hasEmail) {
+        return res
+          .status(404)
+          .json({ message: "Այս էլ. հասցեով օգտատեր գոյություն ունի" });
+      }
+    } else if (req.body.userType === "subCarrier") {
+      const hasEmail = await CarrierModel.findOne({
+        email: req.body.email,
+      });
+      if (hasEmail) {
+        return res
+          .status(404)
+          .json({ message: "Այս էլ. հասցեով օգտատեր գոյություն ունի" });
+      }
     }
 
     const password = req.body.password;
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
 
-    const doc = new SubCustomersModel({
+    let info = {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
-      userType: req.body.userType,
+      userType: "subCustomer",
       parent: req.userId,
       passwordHash: hash,
-    });
+    };
+
+    let doc = null;
+    if (req.body.userType === "subCustomer") {
+      doc = new SubCustomersModel(info);
+    } else if (req.body.userType === "subCarrier") {
+      doc = new SubCarrierModel(info);
+    }
     const user = await doc.save();
 
-    const updated = await CustomersModel.findOneAndUpdate(
-      { _id: req.userId },
-      { $push: { subCustomers: user._id } }
-      // { new: true }
-    );
+    if (req.body.userType === "subCustomer") {
+      const updated = await CustomersModel.findOneAndUpdate(
+        { _id: req.userId },
+        { $push: { subCustomers: user._id } }
+        // { new: true }
+      );
+    } else if (req.body.userType === "subCarrier") {
+      const updated = await CarrierModel.findOneAndUpdate(
+        { _id: req.userId },
+        { $push: { subDrivers: user._id } }
+        // { new: true }
+      );
+    }
+
     res.json(user);
   } catch (err) {
     if (err?.keyValue?.email) {
@@ -138,17 +177,15 @@ export const getCustomersSubs = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const sliceOne = await CustomersModel.findOne({ email: req.body.email });
-    const sliceTwo = await SubCustomersModel.findOne({ email: req.body.email });
-    const sliceThree = await DriverModel.findOne({ email: req.body.email });
     let user = null;
-
-    if (sliceOne) {
-      user = sliceOne;
-    } else if (sliceTwo) {
-      user = sliceTwo;
-    } else if (sliceThree) {
-      user = sliceThree;
+    if (req.body.userType === "customer") {
+      user = await CustomersModel.findOne({ email: req.body.email });
+    } else if (req.body.userType === "carrier") {
+      user = await CarrierModel.findOne({ email: req.body.email });
+    } else if (req.body.userType === "subCustomer") {
+      user = await SubCustomersModel.findOne({ email: req.body.email });
+    } else if (req.body.userType === "subCarrier") {
+      user = await SubCarrierModel.findOne({ email: req.body.email });
     }
 
     if (!user) {
@@ -187,14 +224,15 @@ export const changePass = async (req, res) => {
       return res.status(404).json({ message: "Անհամապատասխան գաղտնաբառ" });
     }
 
-    const sliceOne = await CustomersModel.findOne({ email: req.body.email });
-    const sliceTwo = await SubCustomersModel.findOne({ email: req.body.email });
     let user = null;
-
-    if (sliceOne) {
-      user = sliceOne;
-    } else if (sliceTwo) {
-      user = sliceTwo;
+    if (req.body.userType === "customer") {
+      user = await CustomersModel.findOne({ email: req.body.email });
+    } else if (req.body.userType === "carrier") {
+      user = await CarrierModel.findOne({ email: req.body.email });
+    } else if (req.body.userType === "subCustomer") {
+      user = await SubCustomersModel.findOne({ email: req.body.email });
+    } else if (req.body.userType === "subCarrier") {
+      user = await SubCarrierModel.findOne({ email: req.body.email });
     }
 
     if (!user) {
@@ -235,17 +273,15 @@ export const changePass = async (req, res) => {
 
 export const getMe = async (req, res) => {
   try {
-    const sliceOne = await CustomersModel.findOne({ _id: req.userId });
-    const sliceTwo = await SubCustomersModel.findOne({ _id: req.userId });
-    const sliceThree = await DriverModel.findOne({ _id: req.userId });
     let user = null;
-
-    if (sliceOne) {
-      user = sliceOne;
-    } else if (sliceTwo) {
-      user = sliceTwo;
-    } else if (sliceThree) {
-      user = sliceThree;
+    if (req.body.userType === "customer") {
+      user = await CustomersModel.findOne({ email: req.body.email });
+    } else if (req.body.userType === "carrier") {
+      user = await CarrierModel.findOne({ email: req.body.email });
+    } else if (req.body.userType === "subCustomer") {
+      user = await SubCustomersModel.findOne({ email: req.body.email });
+    } else if (req.body.userType === "subCarrier") {
+      user = await SubCarrierModel.findOne({ email: req.body.email });
     }
 
     if (!user) {

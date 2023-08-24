@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import CustomersModel from "../modules/Customer.js";
 import SubCustomersModel from "../modules/SubCustomer.js";
-import DriverModel from "../modules/Driver.js";
+import DriverModel from "../modules/Carrier.js";
 
 const mailTransporter = nodemailer.createTransport({
   service: "gmail",

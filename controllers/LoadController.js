@@ -1,8 +1,12 @@
 import LoadModel from "../modules/Load.js";
+import CustomersModel from "../modules/Customer.js";
+import SubCustomersModel from "../modules/SubCustomer.js";
 
 export const addNewLoad = async (req, res) => {
   try {
-    const load = await LoadModel({
+    let isSubUser = req.body.userType === "subCustomer";
+
+    let forCustomer = {
       date: req.body.date,
       truckType: req.body.truckType,
       loadType: req.body.loadType,
@@ -14,11 +18,43 @@ export const addNewLoad = async (req, res) => {
       rate: req.body.rate,
       commodity: req.body.commodity,
       comment: req.body.comment,
+
+      customerInfo: req.userId,
+      // subCustomerInfo: req.userId,
+    };
+
+    let forSubCustomer = {
+      date: req.body.date,
+      truckType: req.body.truckType,
+      loadType: req.body.loadType,
+      pickup: req.body.pickup,
+      delivery: req.body.delivery,
+      distance: req.body.distance,
+      length: req.body.length,
+      weight: req.body.weight,
+      rate: req.body.rate,
+      commodity: req.body.commodity,
+      comment: req.body.comment,
+
       customerInfo: req.body.parent,
       subCustomerInfo: req.userId,
-    });
+    };
+
+    const load = await LoadModel(isSubUser ? forSubCustomer : forCustomer);
 
     const result = await load.save();
+
+    if (req.body.userType === "subCustomer") {
+      await SubCustomersModel.findOneAndUpdate(
+        { _id: req.userId },
+        { $push: { loads: result._id } }
+      );
+    } else if (req.body.userType === "customer") {
+      await CustomersModel.findOneAndUpdate(
+        { _id: req.userId },
+        { $push: { loads: result._id } }
+      );
+    }
 
     const fullLoad = await LoadModel.findOne({ _id: result._id })
       .populate({
@@ -29,8 +65,6 @@ export const addNewLoad = async (req, res) => {
         path: "subCustomerInfo",
         select: "email phoneNumber",
       });
-
-    console.log(new Date() - fullLoad.createdAt);
 
     res.json(fullLoad);
   } catch (err) {

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const SubCustomerSchema = new mongoose.Schema(
+const SubDriverSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
@@ -24,18 +24,21 @@ const SubCustomerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    parent: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
-
-    loads: [{ type: mongoose.Schema.Types.ObjectId, ref: "Load" }],
-
+    companyName: {
+      type: String,
+    },
     passwordHash: {
       type: String,
       required: true,
     },
+
+    parent: { type: mongoose.Schema.Types.ObjectId, ref: "Carrier" },
+
+    trucks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Truck" }],
   },
   {
     timestamps: true,
   }
 );
 
-export default mongoose.model("SubCustomer", SubCustomerSchema);
+export default mongoose.model("SubCarrier", SubDriverSchema);

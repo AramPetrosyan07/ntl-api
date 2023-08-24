@@ -61,7 +61,7 @@ app.post(
   CustomerController.changePass
 );
 
-app.get("/auth/me", checkAuth, CustomerController.getMe);
+app.post("/auth/me", checkAuth, CustomerController.getMe);
 
 app.post(
   "/auth/registerSub",
