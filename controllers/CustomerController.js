@@ -79,7 +79,7 @@ export const register = async (req, res) => {
 
 export const registerSub = async (req, res) => {
   try {
-    if (req.body.userType === "subCustomer") {
+    if (req.body.currentUserType === "customer") {
       const hasEmail = await CustomersModel.findOne({
         email: req.body.email,
       });
@@ -88,7 +88,7 @@ export const registerSub = async (req, res) => {
           .status(404)
           .json({ message: "Այս էլ. հասցեով օգտատեր գոյություն ունի" });
       }
-    } else if (req.body.userType === "subCarrier") {
+    } else if (req.body.currentUserType === "carrier") {
       const hasEmail = await CarrierModel.findOne({
         email: req.body.email,
       });
@@ -107,26 +107,32 @@ export const registerSub = async (req, res) => {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
-      userType: "subCustomer",
+      userType:
+        req.body.currentUserType === "customer"
+          ? "subCustomer"
+          : req.body.currentUserType === "carrier"
+          ? "subCarrier"
+          : "",
+      phoneNumber: req.body.phoneNumber,
       parent: req.userId,
       passwordHash: hash,
     };
 
     let doc = null;
-    if (req.body.userType === "subCustomer") {
+    if (req.body.currentUserType === "customer") {
       doc = new SubCustomersModel(info);
-    } else if (req.body.userType === "subCarrier") {
+    } else if (req.body.currentUserType === "carrier") {
       doc = new SubCarrierModel(info);
     }
     const user = await doc.save();
 
-    if (req.body.userType === "subCustomer") {
+    if (req.body.currentUserType === "customer") {
       const updated = await CustomersModel.findOneAndUpdate(
         { _id: req.userId },
         { $push: { subCustomers: user._id } }
         // { new: true }
       );
-    } else if (req.body.userType === "subCarrier") {
+    } else if (req.body.currentUserType === "carrier") {
       const updated = await CarrierModel.findOneAndUpdate(
         { _id: req.userId },
         { $push: { subDrivers: user._id } }
