@@ -143,8 +143,9 @@ export const registerSub = async (req, res) => {
         // { new: true }
       );
     }
+    const { passwordHash, ...userData } = user._doc;
 
-    res.json(user);
+    res.json({ ...userData });
   } catch (err) {
     if (err?.keyValue?.email) {
       res.status(406).json({
@@ -189,13 +190,27 @@ export const login = async (req, res) => {
   try {
     let user = null;
     if (req.body.userType === "customer") {
-      user = await CustomersModel.findOne({ email: req.body.email });
+      await getData(CustomersModel);
     } else if (req.body.userType === "carrier") {
-      user = await CarrierModel.findOne({ email: req.body.email });
+      await getData(CarrierModel);
     } else if (req.body.userType === "subCustomer") {
-      user = await SubCustomersModel.findOne({ email: req.body.email });
+      await getData(SubCustomersModel, "subCustomer");
     } else if (req.body.userType === "subCarrier") {
-      user = await SubCarrierModel.findOne({ email: req.body.email });
+      await getData(SubCarrierModel, "subCarrier");
+    }
+
+    async function getData(MODEL, type) {
+      if (type.toLowerCase().includes("sub")) {
+        user = await MODEL.findOne({ email: req.body.email });
+      } else {
+        user = await MODEL.findOne({ email: req.body.email })
+          .select("-passwordHash")
+          .populate({
+            path: "parent",
+            select:
+              "companyName address website paymentType paymentDuration about",
+          });
+      }
     }
 
     if (!user) {
