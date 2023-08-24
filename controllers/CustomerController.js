@@ -79,6 +79,10 @@ export const register = async (req, res) => {
 
 export const registerSub = async (req, res) => {
   try {
+    if (req.body.newPasswordOne !== req.body.newPasswordTwo) {
+      return res.status(404).json({ message: "Անհամապատասխան գաղտնաբառ" });
+    }
+
     if (req.body.currentUserType === "customer") {
       const hasEmail = await CustomersModel.findOne({
         email: req.body.email,
@@ -99,7 +103,7 @@ export const registerSub = async (req, res) => {
       }
     }
 
-    const password = req.body.password;
+    const password = req.body.newPasswordOne;
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
 
