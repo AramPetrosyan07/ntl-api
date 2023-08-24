@@ -275,13 +275,13 @@ export const getMe = async (req, res) => {
   try {
     let user = null;
     if (req.body.userType === "customer") {
-      user = await CustomersModel.findOne({ email: req.body.email });
+      user = await CustomersModel.findOne({ _id: req.userId });
     } else if (req.body.userType === "carrier") {
-      user = await CarrierModel.findOne({ email: req.body.email });
+      user = await CarrierModel.findOne({ _id: req.userId });
     } else if (req.body.userType === "subCustomer") {
-      user = await SubCustomersModel.findOne({ email: req.body.email });
+      user = await SubCustomersModel.findOne({ _id: req.userId });
     } else if (req.body.userType === "subCarrier") {
-      user = await SubCarrierModel.findOne({ email: req.body.email });
+      user = await SubCarrierModel.findOne({ _id: req.userId });
     }
 
     if (!user) {
