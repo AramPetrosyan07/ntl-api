@@ -59,7 +59,7 @@ export const addNewLoad = async (req, res) => {
     const fullLoad = await LoadModel.findOne({ _id: result._id })
       .populate({
         path: "customerInfo",
-        select: "companyName email phoneNumber",
+        select: "companyName",
       })
       .populate({
         path: "subCustomerInfo",
