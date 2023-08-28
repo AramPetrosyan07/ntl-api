@@ -24,7 +24,7 @@ const LoadSchema = new mongoose.Schema(
     },
     distance: {
       type: Number,
-      required: true,
+      // required: true,
     },
     length: {
       type: Number,
