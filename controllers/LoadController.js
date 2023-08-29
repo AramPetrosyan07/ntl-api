@@ -78,8 +78,7 @@ export const addNewLoad = async (req, res) => {
 export const getLoads = async (req, res) => {
   try {
     const allLoad = await LoadModel.find({ status: "open" })
-
-      .sort({ updatedAt: -1 })
+      .sort({ updatedAt: 1 })
       .populate({
         path: "customerInfo",
         select: "companyName email phoneNumber",
