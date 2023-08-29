@@ -88,7 +88,7 @@ export const getLoads = async (req, res) => {
         select: "email phoneNumber",
       });
 
-    res.json(allLoad);
+    res.json(allLoad.reverse());
   } catch (err) {
     console.log(err);
     res.status(500).json({
