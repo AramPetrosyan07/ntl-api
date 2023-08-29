@@ -99,7 +99,7 @@ export const getLoads = async (req, res) => {
 
 export const getUserLoads = async (req, res) => {
   try {
-    let userType = req.body.userType === "customerInfo";
+    let userType = req.body.userType === "customer";
     const schemeA = await LoadModel.find(
       userType ? { customerInfo: req.userId } : { subCustomerInfo: req.userId }
     );
