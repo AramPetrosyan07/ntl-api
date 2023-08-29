@@ -97,6 +97,26 @@ export const getLoads = async (req, res) => {
   }
 };
 
+export const getUserLoads = async (req, res) => {
+  try {
+    let userType = req.body.userType === "customerInfo";
+    const schemeA = await LoadModel.find(
+      userType ? { customerInfo: req.userId } : { subCustomerInfo: req.userId }
+    );
+    // .select("")
+    // .populate({
+    //   path: "subCustomers",
+    //   select: "-passwordHash",
+    // });
+
+    res.json(schemeA);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Не",
+    });
+  }
+};
 export const getDetailLoad = async (req, res) => {
   try {
     const allLoad = await LoadModel.findOne({ _id: req.body.id })
