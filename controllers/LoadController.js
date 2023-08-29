@@ -102,7 +102,8 @@ export const getUserLoads = async (req, res) => {
     let userType = req.body.userType === "customer";
     const schemeA = await LoadModel.find(
       userType ? { customerInfo: req.userId } : { subCustomerInfo: req.userId }
-    );
+    ).sort({ updatedAt: -1 });
+
     // .select("")
     // .populate({
     //   path: "subCustomers",
