@@ -89,7 +89,7 @@ export const getLoads = async (req, res) => {
         select: "email phoneNumber",
       });
 
-    res.json(allLoad.reverse());
+    res.json(allLoad);
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -103,7 +103,7 @@ export const getUserLoads = async (req, res) => {
     let userType = req.body.userType === "customer";
     const schemeA = await LoadModel.find(
       userType ? { customerInfo: req.userId } : { subCustomerInfo: req.userId }
-    );
+    ).sort({ updatedAt: -1 });
 
     // .select("")
     // .populate({
