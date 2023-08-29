@@ -78,7 +78,7 @@ export const addNewLoad = async (req, res) => {
 export const getLoads = async (req, res) => {
   try {
     const allLoad = await LoadModel.find({ status: "open" })
-
+      .sort({ updatedAt: -1 })
       .populate({
         path: "customerInfo",
         select: "companyName email phoneNumber",
@@ -102,7 +102,7 @@ export const getUserLoads = async (req, res) => {
     let userType = req.body.userType === "customer";
     const schemeA = await LoadModel.find(
       userType ? { customerInfo: req.userId } : { subCustomerInfo: req.userId }
-    ).sort({ updatedAt: -1 });
+    );
 
     // .select("")
     // .populate({
