@@ -190,9 +190,9 @@ export const login = async (req, res) => {
   try {
     let user = null;
     if (req.body.userType === "customer") {
-      await getData(CustomersModel);
+      await getData(CustomersModel, "customer");
     } else if (req.body.userType === "carrier") {
-      await getData(CarrierModel);
+      await getData(CarrierModel, "carrier");
     } else if (req.body.userType === "subCustomer") {
       await getData(SubCustomersModel, "subCustomer");
     } else if (req.body.userType === "subCarrier") {
@@ -200,16 +200,14 @@ export const login = async (req, res) => {
     }
 
     async function getData(MODEL, type) {
-      if (type.toLowerCase().includes("sub")) {
+      if (!type.toLowerCase().includes("sub")) {
         user = await MODEL.findOne({ email: req.body.email });
       } else {
-        user = await MODEL.findOne({ email: req.body.email })
-          .select("-passwordHash")
-          .populate({
-            path: "parent",
-            select:
-              "companyName address website paymentType paymentDuration about",
-          });
+        user = await MODEL.findOne({ email: req.body.email }).populate({
+          path: "parent",
+          select:
+            "companyName address website paymentType paymentDuration about",
+        });
       }
     }
 
@@ -236,6 +234,7 @@ export const login = async (req, res) => {
       token,
     });
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       message:
         "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
