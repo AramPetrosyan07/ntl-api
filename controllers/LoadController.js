@@ -141,9 +141,26 @@ export const getDetailLoad = async (req, res) => {
 
 export const deleteLoad = async (req, res) => {
   try {
-    await LoadModel.findOneAndDelete({ _id: req.body.id });
+    const oneLoad = await LoadModel.findOne({ _id: req.body.id });
 
-    res.json("deleted");
+    let response = null;
+    if (oneLoad?.subCustomerInfo) {
+      if (oneLoad.subCustomerInfo.toString().includes(req.userId)) {
+        response = await LoadModel.findOneAndDelete({
+          _id: req.body.id,
+        });
+      }
+    } else if (oneLoad?.customerInfo) {
+      if (oneLoad.customerInfo.toString().includes(req.userId)) {
+        response = await LoadModel.findOneAndDelete({
+          _id: req.body.id,
+        });
+      }
+    }
+
+    if (response) {
+      res.json({ id: response._id });
+    }
   } catch (err) {
     console.log(err);
     res.status(500).json({
