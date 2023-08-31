@@ -150,12 +150,14 @@ export const deleteLoad = async (req, res) => {
           _id: req.body.id,
         });
       }
-    } else if (oneLoad?.customerInfo) {
-      if (oneLoad.customerInfo.toString().includes(req.userId)) {
-        response = await LoadModel.findOneAndDelete({
-          _id: req.body.id,
-        });
-      }
+    } else if (oneLoad.customerInfo.toString().includes(req.userId)) {
+      response = await LoadModel.findOneAndDelete({
+        _id: req.body.id,
+      });
+    } else {
+      res.status(404).json({
+        message: "You is not parent of this load",
+      });
     }
 
     if (response) {
