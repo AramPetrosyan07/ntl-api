@@ -161,7 +161,8 @@ export const deleteLoad = async (req, res) => {
     }
 
     if (response) {
-      res.json({ id: response._id });
+      // res.json({ id: response._id });
+      res.json({ id: req.body.id });
     }
   } catch (err) {
     console.log(err);
