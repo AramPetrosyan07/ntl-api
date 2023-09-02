@@ -33,7 +33,6 @@ const TruckSchema = new mongoose.Schema(
     rate: {
       type: Number,
     },
-
     comment: {
       type: String,
     },
@@ -41,9 +40,13 @@ const TruckSchema = new mongoose.Schema(
       type: String,
       default: "open",
     },
-    driver: {
+    carrierInfo: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Driver",
+      ref: "Carrier",
+    },
+    subCarrierInfo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SubCarrier",
     },
   },
   {

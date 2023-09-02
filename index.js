@@ -99,11 +99,11 @@ app.post(
   PassRecovery
 );
 
-app.post("/driver/addTrick", checkAuth, DriverController.addTrick);
-app.post("/driver/getTricks", checkAuth, DriverController.getTrick);
-app.post("/driver/getDriverDetail", checkAuth, DriverController.getDriver);
-app.post("/driver/updateTruck", checkAuth, DriverController.updateTruck);
-app.post("/driver/deleteTruck", checkAuth, DriverController.deleteTruck);
+app.post("/truck/addTruck", checkAuth, DriverController.addTruck);
+app.get("/truck/get", DriverController.getTrucks);
+app.post("/truck/getUserTrucks", checkAuth, DriverController.getUserTrucks);
+app.post("/truck/updateTruck", checkAuth, DriverController.updateTruck);
+app.post("/truck/deleteTruck", checkAuth, DriverController.deleteTruck);
 
 app.listen(4000, (err) => {
   if (err) {
