@@ -99,7 +99,7 @@ app.post(
   PassRecovery
 );
 
-app.post("/truck/addTruck", checkAuth, DriverController.addTruck);
+app.post("/truck/add", checkAuth, DriverController.addTruck);
 app.get("/truck/get", DriverController.getTrucks);
 app.post("/truck/getUserTrucks", checkAuth, DriverController.getUserTrucks);
 app.post("/truck/updateTruck", checkAuth, DriverController.updateTruck);
