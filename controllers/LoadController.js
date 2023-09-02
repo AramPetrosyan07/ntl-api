@@ -19,8 +19,8 @@ export const addNewLoad = async (req, res) => {
       commodity: req.body.commodity,
       comment: req.body.comment,
 
-      customerInfo: req.userId,
-      // subCustomerInfo: req.userId,
+      contactInfo: req.userId,
+      // subContactInfo: req.userId,
     };
 
     let forSubCustomer = {
@@ -36,8 +36,8 @@ export const addNewLoad = async (req, res) => {
       commodity: req.body.commodity,
       comment: req.body.comment,
 
-      customerInfo: req.body.parent,
-      subCustomerInfo: req.userId,
+      contactInfo: req.body.parent,
+      subContactInfo: req.userId,
     };
 
     const load = await LoadModel(isSubUser ? forSubCustomer : forCustomer);
@@ -58,11 +58,11 @@ export const addNewLoad = async (req, res) => {
 
     const fullLoad = await LoadModel.findOne({ _id: result._id })
       .populate({
-        path: "customerInfo",
+        path: "contactInfo",
         select: "companyName",
       })
       .populate({
-        path: "subCustomerInfo",
+        path: "subContactInfo",
         select: "email phoneNumber",
       });
 
@@ -80,11 +80,11 @@ export const getLoads = async (req, res) => {
     const allLoad = await LoadModel.find({ status: "open" })
       .sort({ updatedAt: -1 })
       .populate({
-        path: "customerInfo",
+        path: "contactInfo",
         select: "companyName email phoneNumber",
       })
       .populate({
-        path: "subCustomerInfo",
+        path: "subContactInfo",
         select: "email phoneNumber",
       });
 
@@ -101,7 +101,7 @@ export const getUserLoads = async (req, res) => {
   try {
     let userType = req.body.userType === "customer";
     const schemeA = await LoadModel.find(
-      userType ? { customerInfo: req.userId } : { subCustomerInfo: req.userId }
+      userType ? { contactInfo: req.userId } : { subContactInfo: req.userId }
     ).sort({ updatedAt: -1 });
 
     // .select("")
@@ -122,11 +122,11 @@ export const getDetailLoad = async (req, res) => {
   try {
     const allLoad = await LoadModel.findOne({ _id: req.body.id })
       .populate({
-        path: "customerInfo",
+        path: "contactInfo",
         select: "companyName email phoneNumber",
       })
       .populate({
-        path: "subCustomerInfo",
+        path: "subContactInfo",
         select: "email phoneNumber",
       });
 
@@ -144,13 +144,13 @@ export const deleteLoad = async (req, res) => {
     const oneLoad = await LoadModel.findOne({ _id: req.body.id });
 
     let response = null;
-    if (oneLoad?.subCustomerInfo) {
-      if (oneLoad.subCustomerInfo.toString().includes(req.userId)) {
+    if (oneLoad?.subContactInfo) {
+      if (oneLoad.subContactInfo.toString().includes(req.userId)) {
         response = await LoadModel.findOneAndDelete({
           _id: req.body.id,
         });
       }
-    } else if (oneLoad.customerInfo.toString().includes(req.userId)) {
+    } else if (oneLoad.contactInfo.toString().includes(req.userId)) {
       response = await LoadModel.findOneAndDelete({
         _id: req.body.id,
       });

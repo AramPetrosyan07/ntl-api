@@ -40,11 +40,11 @@ const TruckSchema = new mongoose.Schema(
       type: String,
       default: "open",
     },
-    carrierInfo: {
+    contactInfo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Carrier",
     },
-    subCarrierInfo: {
+    subContactInfo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "SubCarrier",
     },

@@ -18,7 +18,7 @@ export const addTruck = async (req, res) => {
       rate: req.body.rate,
       comment: req.body.comment,
 
-      carrierInfo: req.userId,
+      contactInfo: req.userId,
       // subCustomerInfo: req.userId,
     };
 
@@ -34,8 +34,8 @@ export const addTruck = async (req, res) => {
       rate: req.body.rate,
       comment: req.body.comment,
 
-      carrierInfo: req.body.parent,
-      subCarrierInfo: req.userId,
+      contactInfo: req.body.parent,
+      subContactInfo: req.userId,
     };
 
     const load = new TruckModel(isSubUser ? forSubCarrier : forCarrier);
@@ -56,11 +56,11 @@ export const addTruck = async (req, res) => {
 
     const fullTruck = await TruckModel.findOne({ _id: result._id })
       .populate({
-        path: "carrierInfo",
+        path: "contactInfo",
         select: "companyName",
       })
       .populate({
-        path: "subCarrierInfo",
+        path: "subContactInfo",
         select: "email phoneNumber",
       });
 
@@ -78,11 +78,11 @@ export const getTrucks = async (req, res) => {
     const allLoad = await TruckModel.find({ status: "open" })
       .sort({ updatedAt: -1 })
       .populate({
-        path: "carrierInfo",
+        path: "contactInfo",
         select: "companyName email phoneNumber",
       })
       .populate({
-        path: "subCarrierInfo",
+        path: "subContactInfo",
         select: "email phoneNumber",
       });
 
@@ -99,7 +99,7 @@ export const getUserTrucks = async (req, res) => {
   try {
     let userType = req.body.userType === "carrier";
     const schemeA = await TruckModel.find(
-      userType ? { carrierInfo: req.userId } : { subCarrierInfo: req.userId }
+      userType ? { contactInfo: req.userId } : { subContactInfo: req.userId }
     ).sort({ updatedAt: -1 });
 
     res.json(schemeA);
@@ -115,11 +115,11 @@ export const getUserTrucks = async (req, res) => {
 //   try {
 //     const allLoad = await TruckModel.findOne({ _id: req.body.id })
 //       .populate({
-//         path: "carrierInfo",
+//         path: "contactInfo",
 //         select: "companyName email phoneNumber",
 //       })
 //       .populate({
-//         path: "subCarrierInfo",
+//         path: "subContactInfo",
 //         select: "email phoneNumber",
 //       });
 
@@ -137,13 +137,13 @@ export const deleteTruck = async (req, res) => {
     const oneLoad = await TruckModel.findOne({ _id: req.body.id });
 
     let response = null;
-    if (oneLoad?.subCarrierInfo) {
-      if (oneLoad.subCarrierInfo.toString().includes(req.userId)) {
+    if (oneLoad?.subContactInfo) {
+      if (oneLoad.subContactInfo.toString().includes(req.userId)) {
         response = await TruckModel.findOneAndDelete({
           _id: req.body.id,
         });
       }
-    } else if (oneLoad.carrierInfo.toString().includes(req.userId)) {
+    } else if (oneLoad.contactInfo.toString().includes(req.userId)) {
       response = await TruckModel.findOneAndDelete({
         _id: req.body.id,
       });

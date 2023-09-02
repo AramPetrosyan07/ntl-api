@@ -46,12 +46,12 @@ const LoadSchema = new mongoose.Schema(
       type: String,
       default: "open",
     },
-    customerInfo: {
+    contactInfo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
     },
 
-    subCustomerInfo: {
+    subContactInfo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "SubCustomer",
     },
