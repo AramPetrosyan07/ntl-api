@@ -15,12 +15,36 @@ const LoadSchema = new mongoose.Schema(
       required: true,
     },
     pickup: {
-      type: String,
-      required: true,
+      description: {
+        type: String,
+        required: true,
+      },
+      location: {
+        lat: {
+          type: Number,
+          required: true,
+        },
+        lng: {
+          type: Number,
+          required: true,
+        },
+      },
     },
     delivery: {
-      type: String,
-      required: true,
+      description: {
+        type: String,
+        required: true,
+      },
+      location: {
+        lat: {
+          type: Number,
+          required: true,
+        },
+        lng: {
+          type: Number,
+          required: true,
+        },
+      },
     },
     distance: {
       type: Number,
