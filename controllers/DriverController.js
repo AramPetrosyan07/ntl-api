@@ -10,8 +10,12 @@ export const addTruck = async (req, res) => {
       date: req.body.date,
       truckType: req.body.truckType,
       loadType: req.body.loadType,
-      pickup: req.body.pickup,
-      delivery: req.body.delivery,
+      pickup: {
+        description: req.body.pickup,
+      },
+      delivery: {
+        description: req.body.delivery,
+      },
       distance: req.body.distance,
       length: req.body.length,
       weight: req.body.weight,
@@ -26,8 +30,12 @@ export const addTruck = async (req, res) => {
       date: req.body.date,
       truckType: req.body.truckType,
       loadType: req.body.loadType,
-      pickup: req.body.pickup,
-      delivery: req.body.delivery,
+      pickup: {
+        description: req.body.pickup,
+      },
+      delivery: {
+        description: req.body.delivery,
+      },
       distance: req.body.distance,
       length: req.body.length,
       weight: req.body.weight,
@@ -171,8 +179,12 @@ export const updateTruck = async (req, res) => {
       date: req.body.date,
       truckType: req.body.truckType,
       // loadType: req.body.loadType,
-      pickup: req.body.pickup,
-      delivery: req.body.delivery,
+      pickup: {
+        description: req.body.pickup,
+      },
+      delivery: {
+        description: req.body.delivery,
+      },
       distance: req.body.distance,
       length: req.body.length,
       weight: req.body.weight,
