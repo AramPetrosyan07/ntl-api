@@ -15,11 +15,15 @@ const TruckSchema = new mongoose.Schema(
       required: true,
     },
     pickup: {
-      type: String,
-      required: true,
+      description: {
+        type: String,
+        required: true,
+      },
     },
     delivery: {
-      type: String,
+      description: {
+        type: String,
+      },
     },
     distance: {
       type: Number,
