@@ -86,7 +86,7 @@ app.post(
 app.post("/load/add", checkAuth, LoadController.addNewLoad);
 app.get("/load/get", LoadController.getLoads);
 app.post("/load/getUserLoads", checkAuth, LoadController.getUserLoads);
-app.post("/load/getDetail", checkAuth, LoadController.getDetailLoad);
+app.post("/load/getDetail", LoadController.getDetailLoad);
 app.post("/load/updateLoad", checkAuth, LoadController.updateLoad);
 app.post("/load/deleteLoad", checkAuth, LoadController.deleteLoad);
 
