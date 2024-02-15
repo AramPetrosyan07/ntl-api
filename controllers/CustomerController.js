@@ -5,6 +5,13 @@ import SubCustomersModel from "../modules/SubCustomer.js";
 import SubCarrierModel from "../modules/SubCarrier.js";
 import CarrierModel from "../modules/Carrier.js";
 
+//register         done
+//registerSub
+//login            done
+//changePass       done
+//getMe             done
+//getMegetDetailSub
+
 export const register = async (req, res) => {
   try {
     if (req.body.userType === "customer") {
@@ -128,6 +135,7 @@ export const registerSub = async (req, res) => {
     } else if (req.body.currentUserType === "carrier") {
       doc = new SubCarrierModel(info);
     }
+
     const user = await doc.save();
 
     if (req.body.currentUserType === "customer") {
@@ -303,9 +311,19 @@ export const getMe = async (req, res) => {
       user = await CustomersModel.findOne({ _id: req.userId });
     } else if (req.body.userType === "carrier") {
       user = await CarrierModel.findOne({ _id: req.userId });
+      console.log(user);
     } else if (req.body.userType === "subCustomer") {
       user = await SubCustomersModel.findOne({ _id: req.userId });
     } else if (req.body.userType === "subCarrier") {
+      user = await SubCarrierModel.findOne({ _id: req.userId });
+      //alternative (long) variant if we have not userType request from client
+    } else if (!user) {
+      user = await CustomersModel.findOne({ _id: req.userId });
+    } else if (!user) {
+      user = await CarrierModel.findOne({ _id: req.userId });
+    } else if (!user) {
+      user = await SubCustomersModel.findOne({ _id: req.userId });
+    } else if (!user) {
       user = await SubCarrierModel.findOne({ _id: req.userId });
     }
 

@@ -2,16 +2,35 @@ import LoadModel from "../modules/Load.js";
 import CustomersModel from "../modules/Customer.js";
 import SubCustomersModel from "../modules/SubCustomer.js";
 
+//addNewLoad          done
+//getLoads            done
+//getUserLoads        done
+//getDetailLoad       done
+//deleteLoad          done
+//updateLoad          done   (front ic pickup object uxarkelis petqa misht kordinatnery tanq)
+
 export const addNewLoad = async (req, res) => {
   try {
     let isSubUser = req.body.userType === "subCustomer";
-
+    console.log(req.body.pickup.description);
     let forCustomer = {
       date: req.body.date,
       truckType: req.body.truckType,
       loadType: req.body.loadType,
-      pickup: req.body.fromInfo,
-      delivery: req.body.toInfo,
+      pickup: {
+        description: req.body.pickup.description,
+        location: {
+          lat: req.body.pickup.location.lat,
+          lng: req.body.pickup.location.lng,
+        },
+      },
+      delivery: {
+        description: req.body.delivery.description,
+        location: {
+          lat: req.body.delivery.location.lat,
+          lng: req.body.delivery.location.lng,
+        },
+      },
       distance: req.body.distance,
       length: req.body.length,
       weight: req.body.weight,
@@ -27,8 +46,20 @@ export const addNewLoad = async (req, res) => {
       date: req.body.date,
       truckType: req.body.truckType,
       loadType: req.body.loadType,
-      pickup: req.body.pickup,
-      delivery: req.body.delivery,
+      pickup: {
+        description: req.body.pickup.description,
+        location: {
+          lat: req.body.pickup.location.lat,
+          lng: req.body.pickup.location.lng,
+        },
+      },
+      delivery: {
+        description: req.body.delivery.description,
+        location: {
+          lat: req.body.delivery.location.lat,
+          lng: req.body.delivery.location.lng,
+        },
+      },
       distance: req.body.distance,
       length: req.body.length,
       weight: req.body.weight,
@@ -67,6 +98,7 @@ export const addNewLoad = async (req, res) => {
       });
 
     res.json(fullLoad);
+    console.log("sended");
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -118,6 +150,7 @@ export const getUserLoads = async (req, res) => {
     });
   }
 };
+
 export const getDetailLoad = async (req, res) => {
   try {
     const allLoad = await LoadModel.findOne({ _id: req.body.id })
@@ -187,6 +220,34 @@ export const updateLoad = async (req, res) => {
       commodity: req.body.commodity,
       comment: req.body.comment,
       status: req.body.status,
+    };
+    let forCustomer = {
+      date: req.body.date,
+      truckType: req.body.truckType,
+      loadType: req.body.loadType,
+      pickup: {
+        description: req.body.pickup.description,
+        location: {
+          lat: req.body.pickup.location.lat,
+          lng: req.body.pickup.location.lng,
+        },
+      },
+      delivery: {
+        description: req.body.delivery.description,
+        location: {
+          lat: req.body.delivery.location.lat,
+          lng: req.body.delivery.location.lng,
+        },
+      },
+      distance: req.body.distance,
+      length: req.body.length,
+      weight: req.body.weight,
+      rate: req.body.rate,
+      commodity: req.body.commodity,
+      comment: req.body.comment,
+
+      contactInfo: req.userId,
+      // subContactInfo: req.userId,
     };
 
     let response = await LoadModel.findOneAndUpdate(

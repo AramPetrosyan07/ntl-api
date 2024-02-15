@@ -2,6 +2,12 @@ import TruckModel from "../modules/Truck.js";
 import CarrierModel from "../modules/Carrier.js";
 import SubCarrierModel from "../modules/SubCarrier.js";
 
+//addTruck
+//getTrucks
+//getUserTrucks
+//deleteTruck
+//updateTruck
+
 export const addTruck = async (req, res) => {
   try {
     let isSubUser = req.body.userType === "subCarrier";
