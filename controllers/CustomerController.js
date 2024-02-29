@@ -9,9 +9,9 @@ import CarrierModel from "../modules/Carrier.js";
 //registerSub        done
 //login              done
 //changePass         done
-//getMe               done
-//getCustomersSubs    done
-//getDetailSub    done
+//getMe              done
+//getCustomersSubs   done
+//getDetailSub       done
 
 export const register = async (req, res) => {
   try {

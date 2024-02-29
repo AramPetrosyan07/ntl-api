@@ -2,8 +2,8 @@ import LoadModel from "../modules/Load.js";
 import CustomersModel from "../modules/Customer.js";
 import SubCustomersModel from "../modules/SubCustomer.js";
 
-//addNewLoad          done
-//getLoads            done
+//addNewLoad          done      wwf  (work with front)
+//getLoads            done      wwf
 //getUserLoads        done
 //getDetailLoad       done
 //deleteLoad          done
@@ -11,24 +11,25 @@ import SubCustomersModel from "../modules/SubCustomer.js";
 
 export const addNewLoad = async (req, res) => {
   try {
+    // console.log(req.body);
     let isSubUser = req.body.userType === "subCustomer";
-    console.log(req.body.pickup.description);
+
     let forCustomer = {
       date: req.body.date,
       truckType: req.body.truckType,
       loadType: req.body.loadType,
       pickup: {
-        description: req.body.pickup.description,
+        description: req.body.fromInfo.description,
         location: {
-          lat: req.body.pickup.location.lat,
-          lng: req.body.pickup.location.lng,
+          lat: req.body.fromInfo.location.lat,
+          lng: req.body.fromInfo.location.lng,
         },
       },
       delivery: {
-        description: req.body.delivery.description,
+        description: req.body.toInfo.description,
         location: {
-          lat: req.body.delivery.location.lat,
-          lng: req.body.delivery.location.lng,
+          lat: req.body.toInfo.location.lat,
+          lng: req.body.toInfo.location.lng,
         },
       },
       distance: req.body.distance,
@@ -47,17 +48,17 @@ export const addNewLoad = async (req, res) => {
       truckType: req.body.truckType,
       loadType: req.body.loadType,
       pickup: {
-        description: req.body.pickup.description,
+        description: req.body.fromInfo.description,
         location: {
-          lat: req.body.pickup.location.lat,
-          lng: req.body.pickup.location.lng,
+          lat: req.body.fromInfo.location.lat,
+          lng: req.body.fromInfo.location.lng,
         },
       },
       delivery: {
-        description: req.body.delivery.description,
+        description: req.body.toInfo.description,
         location: {
-          lat: req.body.delivery.location.lat,
-          lng: req.body.delivery.location.lng,
+          lat: req.body.toInfo.location.lat,
+          lng: req.body.toInfo.location.lng,
         },
       },
       distance: req.body.distance,
@@ -67,7 +68,7 @@ export const addNewLoad = async (req, res) => {
       commodity: req.body.commodity,
       comment: req.body.comment,
 
-      contactInfo: req.body.parent,
+      contactInfo: req.userId,
       subContactInfo: req.userId,
     };
 
