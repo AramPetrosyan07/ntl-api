@@ -5,12 +5,13 @@ import SubCustomersModel from "../modules/SubCustomer.js";
 import SubCarrierModel from "../modules/SubCarrier.js";
 import CarrierModel from "../modules/Carrier.js";
 
-//register         done
-//registerSub
-//login            done
-//changePass       done
-//getMe             done
-//getMegetDetailSub
+//register           done
+//registerSub        done
+//login              done
+//changePass         done
+//getMe               done
+//getCustomersSubs    done
+//getDetailSub    done
 
 export const register = async (req, res) => {
   try {
@@ -308,23 +309,28 @@ export const getMe = async (req, res) => {
   try {
     let user = null;
     if (req.body.userType === "customer") {
+      console.log("customer");
       user = await CustomersModel.findOne({ _id: req.userId });
     } else if (req.body.userType === "carrier") {
       user = await CarrierModel.findOne({ _id: req.userId });
-      console.log(user);
+      console.log("carrier");
     } else if (req.body.userType === "subCustomer") {
       user = await SubCustomersModel.findOne({ _id: req.userId });
+      console.log("subCustomer");
     } else if (req.body.userType === "subCarrier") {
       user = await SubCarrierModel.findOne({ _id: req.userId });
+      console.log("subCarrier");
       //alternative (long) variant if we have not userType request from client
-    } else if (!user) {
-      user = await CustomersModel.findOne({ _id: req.userId });
-    } else if (!user) {
-      user = await CarrierModel.findOne({ _id: req.userId });
-    } else if (!user) {
-      user = await SubCustomersModel.findOne({ _id: req.userId });
-    } else if (!user) {
-      user = await SubCarrierModel.findOne({ _id: req.userId });
+    } else {
+      if (!user) {
+        user = await CustomersModel.findOne({ _id: req.userId });
+      } else if (!user) {
+        user = await CarrierModel.findOne({ _id: req.userId });
+      } else if (!user) {
+        user = await SubCustomersModel.findOne({ _id: req.userId });
+      } else if (!user) {
+        user = await SubCarrierModel.findOne({ _id: req.userId });
+      }
     }
 
     if (!user) {
@@ -344,7 +350,7 @@ export const getMe = async (req, res) => {
     console.log(err);
     res.status(500).json({
       message:
-        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
+        "Տեղի է ունեցել սխալ` գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
     });
   }
 };

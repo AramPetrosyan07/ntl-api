@@ -25,9 +25,7 @@ const SubCustomerSchema = new mongoose.Schema(
       required: true,
     },
     parent: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
-
     loads: [{ type: mongoose.Schema.Types.ObjectId, ref: "Load" }],
-
     passwordHash: {
       type: String,
       required: true,
