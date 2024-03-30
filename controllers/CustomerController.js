@@ -4,6 +4,7 @@ import CustomersModel from "../modules/Customer.js";
 import SubCustomersModel from "../modules/SubCustomer.js";
 import SubCarrierModel from "../modules/SubCarrier.js";
 import CarrierModel from "../modules/Carrier.js";
+import { checkRegisterSubOptions } from "../utils/tools.js";
 
 //register           done
 //registerSub        done
@@ -110,25 +111,11 @@ export const registerSub = async (req, res) => {
           .json({ message: "Այս էլ. հասցեով օգտատեր գոյություն ունի" });
       }
     }
-
     const password = req.body.password;
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
 
-    let info = {
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      email: req.body.email,
-      userType:
-        req.body.currentUserType === "customer"
-          ? "subCustomer"
-          : req.body.currentUserType === "carrier"
-          ? "subCarrier"
-          : "",
-      phoneNumber: req.body.phoneNumber ? req.body.phoneNumber : "",
-      parent: req.userId,
-      passwordHash: hash,
-    };
+    let info = checkRegisterSubOptions(req.body, req.userId, hash);
 
     let doc = null;
     if (req.body.currentUserType === "customer") {
@@ -173,6 +160,45 @@ export const registerSub = async (req, res) => {
         message:
           "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
       });
+      console.log(err);
+    }
+  }
+};
+
+export const removeSub = async (req, res) => {
+  try {
+    if (req.body.userType === "subCustomer") {
+      const updated = await CustomersModel.findOneAndUpdate(
+        { _id: req.userId },
+        { $push: { subCustomers: user._id } }
+        // { new: true }
+      );
+    } else if (req.body.userType === "subCarrier") {
+      const updated = await CarrierModel.findOneAndUpdate(
+        { _id: req.userId },
+        { $push: { subDrivers: user._id } }
+        // { new: true }
+      );
+    }
+  } catch (err) {
+    if (err?.keyValue?.email) {
+      res.status(406).json({
+        message: "Այս էլ. հասցեով օգտատեր գոյություն ունի",
+      });
+    } else if (err?.keyValue?.companyName) {
+      res.status(406).json({
+        message: "Այս ընկերության անունով օգտատեր գոյություն ունի",
+      });
+    } else if (err?.keyValue?.phoneNumber) {
+      res.status(406).json({
+        message: "Այս հեռախոսահամարով օգտատեր գոյություն ունի",
+      });
+    } else {
+      res.status(500).json({
+        message:
+          "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
+      });
+      console.log(err);
     }
   }
 };
@@ -206,6 +232,16 @@ export const login = async (req, res) => {
       await getData(SubCustomersModel, "subCustomer");
     } else if (req.body.userType === "subCarrier") {
       await getData(SubCarrierModel, "subCarrier");
+    }
+
+    if (!user) {
+      user = await CustomersModel.findOne({ email: req.body.email });
+    } else if (!user) {
+      user = await CarrierModel.findOne({ email: req.body.email });
+    } else if (!user) {
+      user = await SubCustomersModel.findOne({ email: req.body.email });
+    } else if (!user) {
+      user = await SubCarrierModel.findOne({ email: req.body.email });
     }
 
     async function getData(MODEL, type) {

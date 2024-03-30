@@ -72,6 +72,14 @@ app.post(
 );
 
 app.post(
+  "/auth/removeSub",
+  checkAuth,
+  // registerValidation,
+  // handleValidationErrors,
+  CustomerController.removeSub
+);
+
+app.post(
   "/customersInfo/CustomersSubs",
   checkAuth,
   CustomerController.getCustomersSubs
