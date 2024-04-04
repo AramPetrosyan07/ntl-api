@@ -11,6 +11,7 @@ export function checkRegisterSubOptions(body, userId, hash) {
         : "",
     parent: userId,
     passwordHash: hash,
+    currentUserType: body.currentUserType,
   };
 
   if (body.phoneNumber) {

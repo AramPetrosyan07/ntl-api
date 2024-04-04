@@ -98,7 +98,7 @@ export const registerSub = async (req, res) => {
       });
       if (hasEmail) {
         return res
-          .status(404)
+          .status(409)
           .json({ message: "Այս էլ. հասցեով օգտատեր գոյություն ունի" });
       }
     } else if (req.body.currentUserType === "carrier") {
@@ -107,10 +107,11 @@ export const registerSub = async (req, res) => {
       });
       if (hasEmail) {
         return res
-          .status(404)
+          .status(409)
           .json({ message: "Այս էլ. հասցեով օգտատեր գոյություն ունի" });
       }
     }
+
     const password = req.body.password;
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
@@ -144,8 +145,8 @@ export const registerSub = async (req, res) => {
     res.json({ ...userData });
   } catch (err) {
     if (err?.keyValue?.email) {
-      res.status(406).json({
-        message: "Այս էլ. հասցեով օգտատեր գոյություն ունի",
+      res.status(409).json({
+        message: "Այս տվյալներով օգտատեր գոյություն ունի",
       });
     } else if (err?.keyValue?.companyName) {
       res.status(406).json({
@@ -200,24 +201,6 @@ export const removeSub = async (req, res) => {
       });
       console.log(err);
     }
-  }
-};
-
-export const getCustomersSubs = async (req, res) => {
-  try {
-    const schemeA = await CustomersModel.findOne({ _id: req.userId })
-      .select("_id firstName subCustomers")
-      .populate({
-        path: "subCustomers",
-        select: "-passwordHash",
-      });
-
-    res.json(schemeA);
-  } catch (err) {
-    res.status(500).json({
-      message:
-        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
-    });
   }
 };
 
@@ -407,6 +390,41 @@ export const getDetailSub = async (req, res) => {
     }
 
     res.json(user);
+  } catch (err) {
+    res.status(500).json({
+      message:
+        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
+    });
+  }
+};
+
+export const getCustomerSubs = async (req, res) => {
+  try {
+    const schemeA = await CustomersModel.findOne({ _id: req.userId })
+      .select("_id firstName subCustomers")
+      .populate({
+        path: "subCustomers",
+        select: "-passwordHash",
+      });
+
+    res.json(schemeA);
+  } catch (err) {
+    res.status(500).json({
+      message:
+        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
+    });
+  }
+};
+
+export const removeCustomerSub = async (req, res) => {
+  try {
+    console.log(req.body);
+    const user = await CustomersModel.findOne({ _id: req.userId });
+    user.subCustomers.pull(req.body.id);
+    let deleted = await user.save();
+    console.log("-----------");
+    console.log(deleted);
+    res.json("ab");
   } catch (err) {
     res.status(500).json({
       message:

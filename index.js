@@ -79,10 +79,16 @@ app.post(
   CustomerController.removeSub
 );
 
-app.post(
-  "/customersInfo/CustomersSubs",
+app.get(
+  "/customersInfo/CustomerSubs",
   checkAuth,
-  CustomerController.getCustomersSubs
+  CustomerController.getCustomerSubs
+);
+
+app.post(
+  "/customersInfo/removeCustomerSub",
+  checkAuth,
+  CustomerController.removeCustomerSub
 );
 
 app.post(
