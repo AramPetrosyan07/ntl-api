@@ -419,13 +419,28 @@ export const getCustomerSubs = async (req, res) => {
 export const removeCustomerSub = async (req, res) => {
   try {
     console.log(req.body);
-    const user = await CustomersModel.findOne({ _id: req.userId });
-    user.subCustomers.pull(req.body.id);
+    let user = null;
+    if (req.body.userType === "customer") {
+      user = await CustomersModel.findOne({ _id: req.userId });
+    } else if (req.body.userType === "carrier") {
+      user = await CarrierModel.findOne({ _id: req.userId });
+    }
+
+    user.subCustomers.pull(req.body.userId);
     let deleted = await user.save();
     console.log("-----------");
-    console.log(deleted);
-    res.json("ab");
+    console.log(deleted.subCustomers.length);
+
+    let sub = null;
+    if (req.body.userType === "customer") {
+      sub = await SubCustomersModel.findByIdAndDelete(req.body.userId);
+    } else if (req.body.userType === "carrier") {
+      sub = await SubCarrierModel.findByIdAndDelete(req.body.userId);
+    }
+
+    res.json(req.body.userId);
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       message:
         "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
