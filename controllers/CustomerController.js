@@ -438,7 +438,7 @@ export const removeCustomerSub = async (req, res) => {
       sub = await SubCarrierModel.findByIdAndDelete(req.body.userId);
     }
 
-    res.json(req.body.userId);
+    res.status(200).json(req.body.userId);
   } catch (err) {
     console.log(err);
     res.status(500).json({

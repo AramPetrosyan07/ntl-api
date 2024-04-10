@@ -208,52 +208,54 @@ export const deleteLoad = async (req, res) => {
 
 export const updateLoad = async (req, res) => {
   try {
-    let update = {
-      date: req.body.date,
-      truckType: req.body.truckType,
-      // loadType: req.body.loadType,
-      pickup: req.body.pickup,
-      delivery: req.body.delivery,
-      distance: req.body.distance,
-      length: req.body.length,
-      weight: req.body.weight,
-      rate: req.body.rate,
-      commodity: req.body.commodity,
-      comment: req.body.comment,
-      status: req.body.status,
-    };
     let forCustomer = {
-      date: req.body.date,
-      truckType: req.body.truckType,
-      loadType: req.body.loadType,
-      pickup: {
+      contactInfo: req.userId,
+    };
+
+    // Add properties to forCustomer object if they are present in the request body
+    const propertiesToUpdate = [
+      "date",
+      "truckType",
+      "loadType",
+      "pickup",
+      "delivery",
+      "distance",
+      "length",
+      "weight",
+      "rate",
+      "commodity",
+      "comment",
+      "status",
+    ];
+    propertiesToUpdate.forEach((property) => {
+      if (req.body[property] !== undefined) {
+        forCustomer[property] = req.body[property];
+      }
+    });
+
+    // Add pickup and delivery properties if they are present in the request body
+    if (req.body.pickup) {
+      forCustomer.pickup = {
         description: req.body.pickup.description,
         location: {
-          lat: req.body.pickup.location.lat,
-          lng: req.body.pickup.location.lng,
+          lat: req.body.pickup.location?.lat,
+          lng: req.body.pickup.location?.lng,
         },
-      },
-      delivery: {
+      };
+    }
+    if (req.body.delivery) {
+      forCustomer.delivery = {
         description: req.body.delivery.description,
         location: {
-          lat: req.body.delivery.location.lat,
-          lng: req.body.delivery.location.lng,
+          lat: req.body.delivery.location?.lat,
+          lng: req.body.delivery.location?.lng,
         },
-      },
-      distance: req.body.distance,
-      length: req.body.length,
-      weight: req.body.weight,
-      rate: req.body.rate,
-      commodity: req.body.commodity,
-      comment: req.body.comment,
-
-      contactInfo: req.userId,
-      // subContactInfo: req.userId,
-    };
+      };
+    }
 
     let response = await LoadModel.findOneAndUpdate(
       { _id: req.body.id },
-      update,
+      forCustomer,
       { new: true }
     );
 
@@ -261,7 +263,7 @@ export const updateLoad = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      message: "Не",
+      message: "Internal Server Error",
     });
   }
 };
