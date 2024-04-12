@@ -7,3 +7,9 @@ export default (req, res, next) => {
   }
   next();
 };
+
+export function isValidPassword(password) {
+  // Regular expression to match password requirements
+  const regex = /^(?=.*[a-zA-Z])(?=.*\d).{8,}$/;
+  return regex.test(password);
+}

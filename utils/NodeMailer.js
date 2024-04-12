@@ -6,34 +6,70 @@ import CustomersModel from "../modules/Customer.js";
 import SubCustomersModel from "../modules/SubCustomer.js";
 import DriverModel from "../modules/Carrier.js";
 
-const mailTransporter = nodemailer.createTransport({
+export const mailTransporter = nodemailer.createTransport({
+  host: "smtp.gmail.email",
+  secure: false,
   service: "gmail",
   auth: {
-    user: "thesevaksargsyan@gmail.com",
-    pass: "whaidffvttnizhpg",
+    user: "thearampetrosyan@gmail.com",
+    pass: "faclvajajdjr osmh",
   },
 });
 
-const sendVerification = ({ email, verifyCode }) => {
+export const sendMessageToMail = async ({ email, verifyCode }) => {
   let details = {
-    from: "thesevaksargsyan@gmail.com",
+    from: "aspetrosyan07@gmail.com",
     to: email,
-    subject: "testing",
-    text: `Youre verification code is  ${verifyCode}`,
+    subject: "Recover password",
+    text: `Youre code is  ${verifyCode}`,
   };
 
-  mailTransporter.sendMail(details, (err) => {
+  let res = await mailTransporter.sendMail(details, (err) => {
     if (err) {
       console.log("some problem", err);
     } else {
       console.log("sent");
     }
   });
+  console.log(res);
 };
 
-function generateVerificationCode() {
+export function generateVerificationCode() {
   return Math.floor(100000 + Math.random() * 900000);
 }
+
+// export const changePassword = async (req, res) => {
+//   try {
+//     console.log(req.body);
+
+//     let User = null;
+//     if (req.body.userType === "customer") {
+//       User = CustomersModel
+//     } else if (req.body.userType === "carrier") {
+//       User = CarrierModel
+//     } else if (req.body.userType === "subCustomer") {
+//       User = SubCustomersModel
+//     } else if (req.body.userType === "subCarrier") {
+//       User = SubCarrierModel
+//     }
+
+//       User.findOne({ email: req.body.email });
+
+//     // const verificationCode = generateVerificationCode();
+
+//     // sendMessageToMail({
+//     //   email: email,
+//     //   verifyCode: verificationCode,
+//     // });
+
+//     // res.json("Email send");
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({
+//       message: "RecoverSend error",
+//     });
+//   }
+// };
 
 export const RecoverSend = async (req, res) => {
   try {
@@ -61,7 +97,7 @@ export const RecoverSend = async (req, res) => {
 
     await doc.save();
 
-    sendVerification({
+    sendMessageToMail({
       email: email,
       verifyCode: verificationCode,
     });
@@ -180,3 +216,23 @@ export const PassRecovery = async (req, res) => {
     });
   }
 };
+
+// app.get('/', async (_, res) => {
+//   const source = fs.readFileSync('email_template.html', 'utf-8').toString();
+//   const template = handlebars.compile(source);
+//   const replacements = {
+//     username: 'Shilleh',
+//   };
+//   const htmlToSend = template(replacements);
+
+//   const info = await transporter.sendMail({
+//     from: '<some email>',
+//     to: '<some email>',
+//     subject: 'Hello from node',
+//     text: 'Hello world?', // dont really need this but it is recommended to have a text property as well
+//     html: htmlToSend
+//   });
+
+//   console.log('Message sent: %s', info.response);
+//   res.send('Email Sent!');
+// });

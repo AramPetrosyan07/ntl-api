@@ -71,6 +71,8 @@ app.post(
   CustomerController.registerSub
 );
 
+app.post("/load/updateUser", checkAuth, CustomerController.updateUser);
+
 app.post(
   "/auth/removeSub",
   checkAuth,
@@ -103,6 +105,14 @@ app.post("/load/getUserLoads", checkAuth, LoadController.getUserLoads);
 app.post("/load/getDetail", LoadController.getDetailLoad);
 app.post("/load/updateLoad", checkAuth, LoadController.updateLoad);
 app.post("/load/deleteLoad", checkAuth, LoadController.deleteLoad);
+
+app.post(
+  "/changePassword",
+  checkAuth,
+  sendValidation,
+  handleValidationErrors,
+  CustomerController.changePass
+);
 
 app.post("/recover/send", sendValidation, handleValidationErrors, RecoverSend);
 app.post("/recover/response", RecoverResponse);

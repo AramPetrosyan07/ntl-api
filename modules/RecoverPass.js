@@ -1,10 +1,14 @@
 import mongoose from "mongoose";
 
-const RecoverPass = new mongoose.Schema(
+const RecoverPassSchema = new mongoose.Schema(
   {
+    modelType: {
+      type: String,
+      // enum: ["forget password", "change password"],
+      // required: true,
+    },
     token: {
       type: String,
-      required: true,
     },
     verifyToken: {
       type: String,
@@ -12,18 +16,29 @@ const RecoverPass = new mongoose.Schema(
     email: {
       type: String,
       required: true,
+      unique: true,
     },
     verificationCode: {
       type: Number,
-      required: true,
+    },
+    newPassword: {
+      type: String,
+      // validate: {
+      //   validator: function (v) {
+      //     return /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+      //       v
+      //     );
+      //   },
+      //   message: (props) => `${props.value} is not a valid password!`,
+      // },
     },
     expirationTime: {
-      type: Number,
-      required: true,
+      type: Date, // Change type to Date for storing date/time
+      default: () => Date.now() + 1000 * 60 * 1,
+      expires: 0, // Set to 0 to use the default index expiry time
     },
-    verify: {
+    isVerified: {
       type: Boolean,
-      required: true,
       default: false,
     },
   },
@@ -32,4 +47,6 @@ const RecoverPass = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("recover", RecoverPass);
+RecoverPassSchema.index({ expirationTime: 1 }, { expireAfterSeconds: 0 });
+
+export default mongoose.model("RecoverPass", RecoverPassSchema);
