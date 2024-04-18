@@ -303,27 +303,36 @@ export const getMe = async (req, res) => {
   try {
     let user = null;
     if (req.body.userType === "customer") {
-      console.log("customer");
-      user = await CustomersModel.findOne({ _id: req.userId });
+      await getData(CustomersModel, "customer");
     } else if (req.body.userType === "carrier") {
-      user = await CarrierModel.findOne({ _id: req.userId });
-      console.log("carrier");
+      await getData(CarrierModel, "carrier");
     } else if (req.body.userType === "subCustomer") {
-      user = await SubCustomersModel.findOne({ _id: req.userId });
-      console.log("subCustomer");
+      await getData(SubCustomersModel, "subCustomer");
     } else if (req.body.userType === "subCarrier") {
+      await getData(SubCarrierModel, "subCarrier");
+    }
+
+    if (!user) {
+      user = await CustomersModel.findOne({ _id: req.userId });
+    } else if (!user) {
+      user = await CarrierModel.findOne({ _id: req.userId });
+    } else if (!user) {
+      user = await SubCustomersModel.findOne({ _id: req.userId });
+    } else if (!user) {
       user = await SubCarrierModel.findOne({ _id: req.userId });
-      console.log("subCarrier");
-      //alternative (long) variant if we have not userType request from client
-    } else {
-      if (!user) {
-        user = await CustomersModel.findOne({ _id: req.userId });
-      } else if (!user) {
-        user = await CarrierModel.findOne({ _id: req.userId });
-      } else if (!user) {
-        user = await SubCustomersModel.findOne({ _id: req.userId });
-      } else if (!user) {
-        user = await SubCarrierModel.findOne({ _id: req.userId });
+    }
+    console.log("log 288 line");
+    console.log(user);
+
+    async function getData(MODEL, type) {
+      if (!type.toLowerCase().includes("sub")) {
+        user = await MODEL.findOne({ _id: req.userId });
+      } else {
+        user = await MODEL.findOne({ _id: req.userId }).populate({
+          path: "parent",
+          select:
+            "companyName address website paymentType paymentDuration about",
+        });
       }
     }
 

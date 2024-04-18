@@ -71,7 +71,7 @@ app.post(
   CustomerController.registerSub
 );
 
-app.post("/load/updateUser", checkAuth, CustomerController.updateUser);
+app.post("/user/updateUser", checkAuth, CustomerController.updateUser);
 
 app.get(
   "/customersInfo/CustomerSubs",

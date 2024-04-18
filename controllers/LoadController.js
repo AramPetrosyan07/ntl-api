@@ -68,7 +68,7 @@ export const addNewLoad = async (req, res) => {
       commodity: req.body.commodity,
       comment: req.body.comment,
 
-      contactInfo: req.userId,
+      contactInfo: req.body.parent,
       subContactInfo: req.userId,
     };
 
