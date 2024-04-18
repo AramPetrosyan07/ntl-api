@@ -18,7 +18,7 @@ export const mailTransporter = nodemailer.createTransport({
 
 export const sendMessageToMail = async ({ email, verifyCode }) => {
   let details = {
-    from: "aspetrosyan07@gmail.com",
+    from: "thearampetrosyan@gmail.com",
     to: email,
     subject: "Recover password",
     text: `Youre code is  ${verifyCode}`,
@@ -74,25 +74,26 @@ export function generateVerificationCode() {
 export const RecoverSend = async (req, res) => {
   try {
     const { email } = req.body;
-
-    const sliceOne = await CustomersModel.findOne({ email });
-    const sliceTwo = await SubCustomersModel.findOne({ email });
-    const sliceThree = await DriverModel.findOne({ email });
-
-    if (!sliceOne && !sliceTwo && !sliceThree) {
+    console.log(email);
+    let user = null;
+    if (!user) {
+      user = await CustomersModel.findOne({ email: req.body.email });
+    } else if (!user) {
+      user = await CarrierModel.findOne({ email: req.body.email });
+    } else if (!user) {
+      user = await SubCustomersModel.findOne({ email: req.body.email });
+    } else if (!user) {
+      user = await SubCarrierModel.findOne({ email: req.body.email });
+    }
+    console.log(user);
+    if (!user) {
       return res.status(404).json({ message: "invalid email" });
     }
-
     const verificationCode = generateVerificationCode();
-    const salt = await bcrypt.genSalt(10);
-    const token = await bcrypt.hash(email, salt);
-    const expirationTime = Date.now() + 120000;
 
     const doc = new RecoverModel({
-      token,
       email,
       verificationCode,
-      expirationTime,
     });
 
     await doc.save();
@@ -102,7 +103,7 @@ export const RecoverSend = async (req, res) => {
       verifyCode: verificationCode,
     });
 
-    res.json({ token });
+    res.json("code send to email");
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -113,24 +114,14 @@ export const RecoverSend = async (req, res) => {
 
 export const RecoverResponse = async (req, res) => {
   try {
-    const { token, verificationCode } = req.body;
+    const { verificationCode, email } = req.body;
 
-    const data = await RecoverModel.findOne({ token });
-
-    if (!data || data.expirationTime < Date.now()) {
-      return res.status(400).json({ message: "Invalid or expired token" });
-    }
-
-    if (data.verificationCode !== verificationCode) {
-      return res.status(400).json({ message: "Invalid verification code" });
-    }
+    const data = await RecoverModel.findOne({ verificationCode, email });
 
     const salt = await bcrypt.genSalt(10);
     const verifyToken = await bcrypt.hash(data.email, salt);
 
     data.verifyToken = verifyToken;
-    data.verify = true;
-    data.expirationTime = Date.now() + 120000;
     await data.save();
 
     res.json({ message: "Verification successful", verifyToken });
@@ -144,18 +135,15 @@ export const RecoverResponse = async (req, res) => {
 
 export const PassRecovery = async (req, res) => {
   try {
-    const { token, verifyToken, newPasswordOne, newPasswordTwo, email } =
-      req.body;
+    const { verifyToken, newPasswordOne, newPasswordTwo, email } = req.body;
 
-    const data = await RecoverModel.findOne({ token });
+    const data = await RecoverModel.findOne({ verifyToken, email });
 
     if (!data || data.expirationTime < Date.now()) {
       return res.status(400).json({ message: "Invalid or expired token" });
     }
 
-    if (data.verifyToken !== verifyToken && data.verify) {
-      console.log(data.verifyToken, verifyToken);
-      console.log(data);
+    if (data.verifyToken !== verifyToken) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
@@ -163,36 +151,20 @@ export const PassRecovery = async (req, res) => {
       return res.status(404).json({ message: "anhamapatasxan new password" });
     }
 
-    const sliceOne = await CustomersModel.findOne({ email });
-    const sliceTwo = await SubCustomersModel.findOne({ email });
-    const sliceThree = await DriverModel.findOne({ email });
-
     let user = null;
-
-    if (sliceOne) {
-      user = sliceOne;
-    } else if (sliceTwo) {
-      user = sliceTwo;
-    } else if (sliceThree) {
-      user = sliceTwo;
+    if (!user) {
+      user = await CustomersModel.findOne({ email: req.body.email });
+    } else if (!user) {
+      user = await CarrierModel.findOne({ email: req.body.email });
+    } else if (!user) {
+      user = await SubCustomersModel.findOne({ email: req.body.email });
+    } else if (!user) {
+      user = await SubCarrierModel.findOne({ email: req.body.email });
     }
 
     if (!user) {
       return res.status(404).json({ message: "invalid email" });
     }
-
-    await RecoverModel.findOneAndDelete({ token });
-
-    // const isValidPass = await bcrypt.compare(
-    //   req.body.password,
-    //   user._doc.passwordHash
-    // );
-
-    // if (!isValidPass) {
-    //   return res.status(401).json({
-    //     message: "Неверный  пароль",
-    //   });
-    // }
 
     const salt = await bcrypt.genSalt(10);
     const hashedNewPassword = await bcrypt.hash(req.body.newPasswordOne, salt);
@@ -217,22 +189,4 @@ export const PassRecovery = async (req, res) => {
   }
 };
 
-// app.get('/', async (_, res) => {
-//   const source = fs.readFileSync('email_template.html', 'utf-8').toString();
-//   const template = handlebars.compile(source);
-//   const replacements = {
-//     username: 'Shilleh',
-//   };
-//   const htmlToSend = template(replacements);
-
-//   const info = await transporter.sendMail({
-//     from: '<some email>',
-//     to: '<some email>',
-//     subject: 'Hello from node',
-//     text: 'Hello world?', // dont really need this but it is recommended to have a text property as well
-//     html: htmlToSend
-//   });
-
-//   console.log('Message sent: %s', info.response);
-//   res.send('Email Sent!');
-// });
+// change email

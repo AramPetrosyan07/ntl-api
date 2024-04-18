@@ -104,12 +104,12 @@ app.post(
 
 app.post("/recover/send", sendValidation, handleValidationErrors, RecoverSend);
 app.post("/recover/response", RecoverResponse);
-app.post(
-  "/recover/PassRecovery",
-  loginValidation,
-  handleValidationErrors,
-  PassRecovery
-);
+app.post("/recover/PassRecovery", PassRecovery);
+
+// change Email
+// app.post("/recover/send", sendValidation, handleValidationErrors, RecoverSend);
+// app.post("/recover/response", RecoverResponse);
+// app.post("/recover/PassRecovery", PassRecovery);
 
 app.post("/truck/add", checkAuth, DriverController.addTruck);
 app.get("/truck/get", DriverController.getTrucks);

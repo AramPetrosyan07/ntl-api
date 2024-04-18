@@ -34,7 +34,7 @@ const RecoverPassSchema = new mongoose.Schema(
     },
     expirationTime: {
       type: Date, // Change type to Date for storing date/time
-      default: () => Date.now() + 1000 * 60 * 1,
+      default: () => Date.now() + 1000 * 60 * 3,
       expires: 0, // Set to 0 to use the default index expiry time
     },
     isVerified: {
