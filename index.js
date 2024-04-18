@@ -73,25 +73,13 @@ app.post(
 
 app.post("/load/updateUser", checkAuth, CustomerController.updateUser);
 
-app.post(
-  "/auth/removeSub",
-  checkAuth,
-  // registerValidation,
-  // handleValidationErrors,
-  CustomerController.removeSub
-);
-
 app.get(
   "/customersInfo/CustomerSubs",
   checkAuth,
   CustomerController.getCustomerSubs
 );
 
-app.post(
-  "/customersInfo/removeCustomerSub",
-  checkAuth,
-  CustomerController.removeCustomerSub
-);
+app.post("/customersInfo/removeSub", checkAuth, CustomerController.removeSub);
 
 app.post(
   "/customersInfo/getDetailSub",

@@ -230,44 +230,6 @@ export const updateUser = async (req, res) => {
   }
 };
 
-export const removeSub = async (req, res) => {
-  try {
-    if (req.body.userType === "subCustomer") {
-      const updated = await CustomersModel.findOneAndUpdate(
-        { _id: req.userId },
-        { $push: { subCustomers: user._id } }
-        // { new: true }
-      );
-    } else if (req.body.userType === "subCarrier") {
-      const updated = await CarrierModel.findOneAndUpdate(
-        { _id: req.userId },
-        { $push: { subDrivers: user._id } }
-        // { new: true }
-      );
-    }
-  } catch (err) {
-    if (err?.keyValue?.email) {
-      res.status(406).json({
-        message: "Այս էլ. հասցեով օգտատեր գոյություն ունի",
-      });
-    } else if (err?.keyValue?.companyName) {
-      res.status(406).json({
-        message: "Այս ընկերության անունով օգտատեր գոյություն ունի",
-      });
-    } else if (err?.keyValue?.phoneNumber) {
-      res.status(406).json({
-        message: "Այս հեռախոսահամարով օգտատեր գոյություն ունի",
-      });
-    } else {
-      res.status(500).json({
-        message:
-          "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
-      });
-      console.log(err);
-    }
-  }
-};
-
 export const login = async (req, res) => {
   try {
     let user = null;
@@ -429,7 +391,7 @@ export const getCustomerSubs = async (req, res) => {
   }
 };
 
-export const removeCustomerSub = async (req, res) => {
+export const removeSub = async (req, res) => {
   try {
     console.log(req.body);
     let user = null;
