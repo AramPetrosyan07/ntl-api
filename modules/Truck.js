@@ -19,14 +19,35 @@ const TruckSchema = new mongoose.Schema(
         type: String,
         required: true,
       },
+      location: {
+        lat: {
+          type: Number,
+          required: true,
+        },
+        lng: {
+          type: Number,
+          required: true,
+        },
+      },
     },
     delivery: {
       description: {
         type: String,
+        required: true,
+      },
+      location: {
+        lat: {
+          type: Number,
+          required: true,
+        },
+        lng: {
+          type: Number,
+          required: true,
+        },
       },
     },
     distance: {
-      type: Number,
+      type: String,
     },
     length: {
       type: Number,
