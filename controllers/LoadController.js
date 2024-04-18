@@ -177,17 +177,30 @@ export const deleteLoad = async (req, res) => {
   try {
     const oneLoad = await LoadModel.findOne({ _id: req.body.id });
 
+    let updatedSubCustomer = null;
     let response = null;
     if (oneLoad?.subContactInfo) {
       if (oneLoad.subContactInfo.toString().includes(req.userId)) {
         response = await LoadModel.findOneAndDelete({
           _id: req.body.id,
         });
+
+        updatedSubCustomer = await SubCustomersModel.findOneAndUpdate(
+          { _id: req.userId },
+          { $pull: { loads: req.body.id } },
+          { new: true }
+        );
       }
     } else if (oneLoad.contactInfo.toString().includes(req.userId)) {
       response = await LoadModel.findOneAndDelete({
         _id: req.body.id,
       });
+
+      updatedSubCustomer = await CustomersModel.findOneAndUpdate(
+        { _id: req.userId },
+        { $pull: { loads: req.body.id } },
+        { new: true }
+      );
     } else {
       res.status(404).json({
         message: "You is not parent of this load",

@@ -14,9 +14,12 @@ import {
 } from "./Validations.js";
 import checkAuth from "./utils/checkAuth.js";
 import {
+  ChangeEmail,
+  CheckCode,
   PassRecovery,
   RecoverResponse,
   RecoverSend,
+  SendCodeToMail,
 } from "./utils/NodeMailer.js";
 
 mongoose
@@ -107,9 +110,9 @@ app.post("/recover/response", RecoverResponse);
 app.post("/recover/PassRecovery", PassRecovery);
 
 // change Email
-// app.post("/recover/send", sendValidation, handleValidationErrors, RecoverSend);
-// app.post("/recover/response", RecoverResponse);
-// app.post("/recover/PassRecovery", PassRecovery);
+app.post("/email/send", sendValidation, handleValidationErrors, SendCodeToMail);
+app.post("/email/check", CheckCode);
+app.post("/email/change", ChangeEmail);
 
 app.post("/truck/add", checkAuth, DriverController.addTruck);
 app.get("/truck/get", DriverController.getTrucks);
