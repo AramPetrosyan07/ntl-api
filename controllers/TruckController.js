@@ -12,24 +12,35 @@ export const addTruck = async (req, res) => {
   try {
     let isSubUser = req.body.userType === "subCarrier";
 
+    console.log(req.body);
+
     let forCarrier = {
       date: req.body.date,
       truckType: req.body.truckType,
       loadType: req.body.loadType,
       pickup: {
-        description: req.body.pickup,
+        description: req.body.fromInfo.description,
+        location: {
+          lat: req.body.fromInfo.location.lat,
+          lng: req.body.fromInfo.location.lng,
+        },
       },
       delivery: {
-        description: req.body.delivery,
+        description: req?.body?.toInfo?.description,
+        location: {
+          lat: req?.body.toInfo?.location?.lat,
+          lng: req?.body?.toInfo?.location?.lng,
+        },
       },
       distance: req.body.distance,
       length: req.body.length,
       weight: req.body.weight,
       rate: req.body.rate,
+      commodity: req.body.commodity,
       comment: req.body.comment,
 
       contactInfo: req.userId,
-      // subCustomerInfo: req.userId,
+      // subContactInfo: req.userId,
     };
 
     let forSubCarrier = {
@@ -37,15 +48,24 @@ export const addTruck = async (req, res) => {
       truckType: req.body.truckType,
       loadType: req.body.loadType,
       pickup: {
-        description: req.body.pickup,
+        description: req.body.fromInfo.description,
+        location: {
+          lat: req.body.fromInfo.location.lat,
+          lng: req.body.fromInfo.location.lng,
+        },
       },
       delivery: {
-        description: req.body.delivery,
+        description: req?.body?.toInfo?.description,
+        location: {
+          lat: req?.body.toInfo?.location?.lat,
+          lng: req?.body?.toInfo?.location?.lng,
+        },
       },
       distance: req.body.distance,
       length: req.body.length,
       weight: req.body.weight,
       rate: req.body.rate,
+      commodity: req.body.commodity,
       comment: req.body.comment,
 
       contactInfo: req.body.parent,
@@ -150,17 +170,30 @@ export const deleteTruck = async (req, res) => {
   try {
     const oneLoad = await TruckModel.findOne({ _id: req.body.id });
 
+    let updatedSubCustomer = null;
     let response = null;
     if (oneLoad?.subContactInfo) {
       if (oneLoad.subContactInfo.toString().includes(req.userId)) {
         response = await TruckModel.findOneAndDelete({
           _id: req.body.id,
         });
+
+        updatedSubCustomer = await SubCarrierModel.findOneAndUpdate(
+          { _id: req.userId },
+          { $pull: { loads: req.body.id } },
+          { new: true }
+        );
       }
     } else if (oneLoad.contactInfo.toString().includes(req.userId)) {
       response = await TruckModel.findOneAndDelete({
         _id: req.body.id,
       });
+
+      updatedSubCustomer = await CarrierModel.findOneAndUpdate(
+        { _id: req.userId },
+        { $pull: { loads: req.body.id } },
+        { new: true }
+      );
     } else {
       res.status(404).json({
         message: "You is not parent of this load",
@@ -181,27 +214,55 @@ export const deleteTruck = async (req, res) => {
 
 export const updateTruck = async (req, res) => {
   try {
-    let update = {
-      date: req.body.date,
-      truckType: req.body.truckType,
-      // loadType: req.body.loadType,
-      pickup: {
-        description: req.body.pickup,
-      },
-      delivery: {
-        description: req.body.delivery,
-      },
-      distance: req.body.distance,
-      length: req.body.length,
-      weight: req.body.weight,
-      rate: req.body.rate,
-      comment: req.body.comment,
-      status: req.body.status,
+    let forCarrier = {
+      contactInfo: req.userId,
     };
+
+    const propertiesToUpdate = [
+      "date",
+      "truckType",
+      "loadType",
+      "pickup",
+      "delivery",
+      "distance",
+      "length",
+      "weight",
+      "rate",
+      "commodity",
+      "comment",
+      "status",
+    ];
+    propertiesToUpdate.forEach((property) => {
+      if (req.body[property] !== undefined) {
+        forCarrier[property] = req.body[property];
+      }
+    });
+
+    if (req.body?.fromInfo) {
+      forCarrier.pickup = {
+        description: req.body.fromInfo.description,
+        location: {
+          lat: req.body.fromInfo.location?.lat,
+          lng: req.body.fromInfo.location?.lng,
+        },
+      };
+    }
+
+    if (req.body?.toInfo) {
+      forCarrier.delivery = {
+        description: req.body.toInfo.description,
+        location: {
+          lat: req.body?.toInfo?.location?.lat,
+          lng: req.body?.toInfo?.location?.lng,
+        },
+      };
+    } else {
+      forCarrier.delivery = {}; // Reset delivery value to empty object
+    }
 
     let response = await TruckModel.findOneAndUpdate(
       { _id: req.body.id },
-      update,
+      forCarrier,
       { new: true }
     );
 

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const SubDriverSchema = new mongoose.Schema(
+const SubCarrierSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
@@ -41,4 +41,4 @@ const SubDriverSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("SubCarrier", SubDriverSchema);
+export default mongoose.model("SubCarrier", SubCarrierSchema);

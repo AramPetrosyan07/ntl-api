@@ -225,7 +225,6 @@ export const updateLoad = async (req, res) => {
       contactInfo: req.userId,
     };
 
-    // Add properties to forCustomer object if they are present in the request body
     const propertiesToUpdate = [
       "date",
       "truckType",
@@ -246,22 +245,21 @@ export const updateLoad = async (req, res) => {
       }
     });
 
-    // Add pickup and delivery properties if they are present in the request body
-    if (req.body.pickup) {
+    if (req.body?.fromInfo) {
       forCustomer.pickup = {
-        description: req.body.pickup.description,
+        description: req.body.fromInfo.description,
         location: {
-          lat: req.body.pickup.location?.lat,
-          lng: req.body.pickup.location?.lng,
+          lat: req.body.fromInfo.location?.lat,
+          lng: req.body.fromInfo.location?.lng,
         },
       };
     }
-    if (req.body.delivery) {
+    if (req.body?.toInfo) {
       forCustomer.delivery = {
-        description: req.body.delivery.description,
+        description: req.body.toInfo.description,
         location: {
-          lat: req.body.delivery.location?.lat,
-          lng: req.body.delivery.location?.lng,
+          lat: req.body?.toInfo?.location?.lat,
+          lng: req.body?.toInfo?.location?.lng,
         },
       };
     }

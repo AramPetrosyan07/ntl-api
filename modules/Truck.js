@@ -4,7 +4,7 @@ const TruckSchema = new mongoose.Schema(
   {
     date: {
       type: String,
-      required: true,
+      // required: true,
     },
     truckType: {
       type: String,
@@ -33,16 +33,16 @@ const TruckSchema = new mongoose.Schema(
     delivery: {
       description: {
         type: String,
-        required: true,
+        // required: true,
       },
       location: {
         lat: {
           type: Number,
-          required: true,
+          // required: true,
         },
         lng: {
           type: Number,
-          required: true,
+          // required: true,
         },
       },
     },

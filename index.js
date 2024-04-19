@@ -2,9 +2,9 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import "dotenv/config";
-import * as CustomerController from "./controllers/CustomerController.js";
+import * as UserController from "./controllers/UserController.js";
 import * as LoadController from "./controllers/LoadController.js";
-import * as DriverController from "./controllers/DriverController.js";
+import * as TruckController from "./controllers/TruckController.js";
 import handleValidationErrors from "./utils/handleValidationErrors.js";
 import {
   registerValidation,
@@ -47,48 +47,42 @@ app.post(
   "/auth/register",
   registerValidation,
   handleValidationErrors,
-  CustomerController.register
+  UserController.register
 );
 
 app.post(
   "/auth/login",
   loginValidation,
   handleValidationErrors,
-  CustomerController.login
+  UserController.login
 );
 
 app.post(
   "/auth/changePass",
   changePassValidation,
   handleValidationErrors,
-  CustomerController.changePass
+  UserController.changePass
 );
 
-app.post("/auth/me", checkAuth, CustomerController.getMe);
+app.post("/auth/me", checkAuth, UserController.getMe);
 
 app.post(
   "/auth/registerSub",
   checkAuth,
   // registerValidation,
   // handleValidationErrors,
-  CustomerController.registerSub
+  UserController.registerSub
 );
 
-app.post("/user/updateUser", checkAuth, CustomerController.updateUser);
+app.post("/user/updateUser", checkAuth, UserController.updateUser);
 
-app.get(
-  "/customersInfo/CustomerSubs",
-  checkAuth,
-  CustomerController.getCustomerSubs
-);
+app.post("/user/UserSubs", checkAuth, UserController.getUserSubs);
 
-app.post("/customersInfo/removeSub", checkAuth, CustomerController.removeSub);
+// app.get("/customersInfo/CarrierSubs", checkAuth, UserController.getCarrierSubs);
 
-app.post(
-  "/customersInfo/getDetailSub",
-  checkAuth,
-  CustomerController.getDetailSub
-);
+app.post("/customersInfo/removeSub", checkAuth, UserController.removeSub);
+
+app.post("/customersInfo/getDetailSub", checkAuth, UserController.getDetailSub);
 
 app.post("/load/add", checkAuth, LoadController.addNewLoad);
 app.get("/load/get", LoadController.getLoads);
@@ -102,7 +96,7 @@ app.post(
   checkAuth,
   sendValidation,
   handleValidationErrors,
-  CustomerController.changePass
+  UserController.changePass
 );
 
 app.post("/recover/send", sendValidation, handleValidationErrors, RecoverSend);
@@ -114,11 +108,11 @@ app.post("/email/send", sendValidation, handleValidationErrors, SendCodeToMail);
 app.post("/email/check", CheckCode);
 app.post("/email/change", ChangeEmail);
 
-app.post("/truck/add", checkAuth, DriverController.addTruck);
-app.get("/truck/get", DriverController.getTrucks);
-app.post("/truck/getUserTrucks", checkAuth, DriverController.getUserTrucks);
-app.post("/truck/updateTruck", checkAuth, DriverController.updateTruck);
-app.post("/truck/deleteTruck", checkAuth, DriverController.deleteTruck);
+app.post("/truck/add", checkAuth, TruckController.addTruck);
+app.get("/truck/get", TruckController.getTrucks);
+app.post("/truck/getUserTrucks", checkAuth, TruckController.getUserTrucks);
+app.post("/truck/updateTruck", checkAuth, TruckController.updateTruck);
+app.post("/truck/deleteTruck", checkAuth, TruckController.deleteTruck);
 
 app.listen(4000, (err) => {
   if (err) {

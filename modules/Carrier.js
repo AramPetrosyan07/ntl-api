@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 // shofer
-const DriverSchema = new mongoose.Schema(
+const CarrierSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
@@ -41,4 +41,4 @@ const DriverSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("Carrier", DriverSchema);
+export default mongoose.model("Carrier", CarrierSchema);

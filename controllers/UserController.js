@@ -14,16 +14,6 @@ import {
 import { isValidPassword } from "../utils/handleValidationErrors.js";
 const { MongoServerError } = pkg;
 
-//register           done
-//registerSub        done
-//login              done
-//changePass         done
-//getMe              done
-//getCustomersSubs   done
-//getDetailSub       done
-//getCustomerSubs    ??
-//removeCustomerSub  ??
-
 export const register = async (req, res) => {
   try {
     if (req.body.userType === "customer") {
@@ -98,10 +88,12 @@ export const register = async (req, res) => {
 
 export const registerSub = async (req, res) => {
   try {
+    console.log(req.body);
     if (req.body.password !== req.body.repetPassword) {
       return res.status(404).json({ message: "Անհամապատասխան գաղտնաբառ" });
     }
 
+    //check
     if (req.body.currentUserType === "customer") {
       const hasEmail = await CustomersModel.findOne({
         email: req.body.email,
@@ -146,7 +138,7 @@ export const registerSub = async (req, res) => {
     } else if (req.body.currentUserType === "carrier") {
       const updated = await CarrierModel.findOneAndUpdate(
         { _id: req.userId },
-        { $push: { subDrivers: user._id } }
+        { $push: { subCarrier: user._id } }
         // { new: true }
       );
     }
@@ -252,8 +244,6 @@ export const login = async (req, res) => {
     } else if (!user) {
       user = await SubCarrierModel.findOne({ email: req.body.email });
     }
-    console.log("log 288 line");
-    console.log(user);
 
     async function getData(MODEL, type) {
       if (!type.toLowerCase().includes("sub")) {
@@ -321,8 +311,6 @@ export const getMe = async (req, res) => {
     } else if (!user) {
       user = await SubCarrierModel.findOne({ _id: req.userId });
     }
-    console.log("log 288 line");
-    console.log(user);
 
     async function getData(MODEL, type) {
       if (!type.toLowerCase().includes("sub")) {
@@ -382,12 +370,42 @@ export const getDetailSub = async (req, res) => {
   }
 };
 
-export const getCustomerSubs = async (req, res) => {
+export const getUserSubs = async (req, res) => {
   try {
-    const schemeA = await CustomersModel.findOne({ _id: req.userId })
-      .select("_id firstName subCustomers")
+    let isCustomer = req.body.userType === "customer";
+    let subs = null;
+    if (isCustomer) {
+      subs = await CustomersModel.findOne({ _id: req.userId })
+        .select("_id firstName subCustomers")
+        .populate({
+          path: "subCustomers",
+          select: "-passwordHash",
+        });
+    } else {
+      subs = await CarrierModel.findOne({ _id: req.userId })
+        .select("_id firstName subCarrier")
+        .populate({
+          path: "subCarrier",
+          select: "-passwordHash",
+        });
+    }
+
+    res.json(subs);
+  } catch (err) {
+    res.status(500).json({
+      message:
+        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
+    });
+  }
+};
+
+//----
+export const getCarrierSubs = async (req, res) => {
+  try {
+    const schemeA = await CarrierModel.findOne({ _id: req.userId })
+      .select("_id firstName subCarrier")
       .populate({
-        path: "subCustomers",
+        path: "subCarrier",
         select: "-passwordHash",
       });
 
