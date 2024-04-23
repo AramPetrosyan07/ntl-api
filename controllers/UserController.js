@@ -1,3 +1,4 @@
+import LoadModel from "../modules/Load.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import CustomersModel from "../modules/Customer.js";
@@ -389,7 +390,7 @@ export const getUserSubs = async (req, res) => {
           select: "-passwordHash",
         });
     }
-
+    console.log(subs);
     res.json(subs);
   } catch (err) {
     res.status(500).json({
@@ -420,7 +421,6 @@ export const getCarrierSubs = async (req, res) => {
 
 export const removeSub = async (req, res) => {
   try {
-    console.log(req.body);
     let user = null;
     if (req.body.userType === "customer") {
       user = await CustomersModel.findOne({ _id: req.userId });
@@ -430,8 +430,6 @@ export const removeSub = async (req, res) => {
 
     user.subCustomers.pull(req.body.userId);
     let deleted = await user.save();
-    console.log("-----------");
-    console.log(deleted.subCustomers.length);
 
     let sub = null;
     if (req.body.userType === "customer") {
@@ -581,6 +579,31 @@ export const changePass = async (req, res) => {
     res.status(500).json({
       message:
         "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
+    });
+  }
+};
+
+export const Test = async (req, res) => {
+  let customerId = req.userId;
+  try {
+    const customer = await CustomersModel.findById(customerId).exec();
+
+    const subCustomers = await SubCustomersModel.find({
+      parent: customerId,
+    }).exec();
+
+    const loadPromises = await subCustomers.map((subCustomer) =>
+      LoadModel.find({ subContactInfo: subCustomer._id }).exec()
+    );
+
+    console.log(loadPromises);
+
+    res.json("ok");
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message:
+        "Տեղի է ունեցել սխալ` գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
     });
   }
 };

@@ -170,7 +170,7 @@ export const deleteTruck = async (req, res) => {
   try {
     const oneLoad = await TruckModel.findOne({ _id: req.body.id });
 
-    let updatedSubCustomer = null;
+    let updatedSubCarrier = null;
     let response = null;
     if (oneLoad?.subContactInfo) {
       if (oneLoad.subContactInfo.toString().includes(req.userId)) {
@@ -178,7 +178,7 @@ export const deleteTruck = async (req, res) => {
           _id: req.body.id,
         });
 
-        updatedSubCustomer = await SubCarrierModel.findOneAndUpdate(
+        updatedSubCarrier = await SubCarrierModel.findOneAndUpdate(
           { _id: req.userId },
           { $pull: { loads: req.body.id } },
           { new: true }
@@ -189,9 +189,9 @@ export const deleteTruck = async (req, res) => {
         _id: req.body.id,
       });
 
-      updatedSubCustomer = await CarrierModel.findOneAndUpdate(
+      updatedSubCarrier = await CarrierModel.findOneAndUpdate(
         { _id: req.userId },
-        { $pull: { loads: req.body.id } },
+        { $pull: { trucks: req.body.id } },
         { new: true }
       );
     } else {

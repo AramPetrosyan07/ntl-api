@@ -114,6 +114,8 @@ app.post("/truck/getUserTrucks", checkAuth, TruckController.getUserTrucks);
 app.post("/truck/updateTruck", checkAuth, TruckController.updateTruck);
 app.post("/truck/deleteTruck", checkAuth, TruckController.deleteTruck);
 
+app.post("/user/test", checkAuth, UserController.Test);
+
 app.listen(4000, (err) => {
   if (err) {
     console.log(err);
