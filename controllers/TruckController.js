@@ -17,7 +17,7 @@ export const addTruck = async (req, res) => {
     let forCarrier = {
       date: req.body.date,
       truckType: req.body.truckType,
-      loadType: req.body.loadType,
+      type: req.body.type,
       pickup: {
         description: req.body.fromInfo.description,
         location: {
@@ -46,7 +46,7 @@ export const addTruck = async (req, res) => {
     let forSubCarrier = {
       date: req.body.date,
       truckType: req.body.truckType,
-      loadType: req.body.loadType,
+      type: req.body.type,
       pickup: {
         description: req.body.fromInfo.description,
         location: {
@@ -221,7 +221,7 @@ export const updateTruck = async (req, res) => {
     const propertiesToUpdate = [
       "date",
       "truckType",
-      "loadType",
+      "type",
       "pickup",
       "delivery",
       "distance",

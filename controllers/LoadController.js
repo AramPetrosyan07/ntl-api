@@ -17,7 +17,7 @@ export const addNewLoad = async (req, res) => {
     let forCustomer = {
       date: req.body.date,
       truckType: req.body.truckType,
-      loadType: req.body.loadType,
+      type: req.body.type,
       pickup: {
         description: req.body.fromInfo.description,
         location: {
@@ -46,7 +46,7 @@ export const addNewLoad = async (req, res) => {
     let forSubCustomer = {
       date: req.body.date,
       truckType: req.body.truckType,
-      loadType: req.body.loadType,
+      type: req.body.type,
       pickup: {
         description: req.body.fromInfo.description,
         location: {
@@ -228,7 +228,7 @@ export const updateLoad = async (req, res) => {
     const propertiesToUpdate = [
       "date",
       "truckType",
-      "loadType",
+      "type",
       "pickup",
       "delivery",
       "distance",

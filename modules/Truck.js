@@ -10,7 +10,7 @@ const TruckSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    loadType: {
+    type: {
       type: String,
       required: true,
     },
