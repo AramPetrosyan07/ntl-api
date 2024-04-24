@@ -8,6 +8,7 @@ import CarrierModel from "../modules/Carrier.js";
 import { checkRegisterSubOptions } from "../utils/tools.js";
 import RecoverModel from "../modules/RecoverPass.js";
 import pkg from "mongoose";
+import moment from "moment";
 import {
   generateVerificationCode,
   sendMessageToMail,
@@ -89,7 +90,6 @@ export const register = async (req, res) => {
 
 export const registerSub = async (req, res) => {
   try {
-    console.log(req.body);
     if (req.body.password !== req.body.repetPassword) {
       return res.status(404).json({ message: "Անհամապատասխան գաղտնաբառ" });
     }
@@ -390,7 +390,6 @@ export const getUserSubs = async (req, res) => {
           select: "-passwordHash",
         });
     }
-    console.log(subs);
     res.json(subs);
   } catch (err) {
     res.status(500).json({
@@ -450,7 +449,6 @@ export const removeSub = async (req, res) => {
 
 export const changePassword = async (req, res) => {
   try {
-    console.log(req.body);
     if (req.body.newPassword !== req.body.repetPassword) {
       console.log("Անհամապատասխան գաղտնաբառ");
       return res.status(404).json({ message: "Անհամապատասխան գաղտնաբառ" });
@@ -514,7 +512,6 @@ export const changePassword = async (req, res) => {
 
 export const changePass = async (req, res) => {
   try {
-    console.log(req.body);
     if (req.body.newPassword !== req.body.repetPassword) {
       console.log("Անհամապատասխան գաղտնաբառ");
       return res.status(404).json({ message: "Անհամապատասխան գաղտնաբառ" });
@@ -542,8 +539,6 @@ export const changePass = async (req, res) => {
       email: req.body.email,
     });
 
-    console.log(!!user);
-
     if (!user) {
       res.status(404).json({
         message: "Ձեր տվյալները սխալ են",
@@ -554,7 +549,6 @@ export const changePass = async (req, res) => {
       req.body.currentPassword,
       user._doc.passwordHash
     );
-    console.log(isValidPass);
 
     if (!isValidPass) {
       return res.status(401).json({
@@ -583,27 +577,112 @@ export const changePass = async (req, res) => {
   }
 };
 
-export const Test = async (req, res) => {
+export const workersSalary = async (req, res) => {
   let customerId = req.userId;
   try {
-    const customer = await CustomersModel.findById(customerId).exec();
+    const customer = await CustomersModel.findById(customerId)
+      .populate("subCustomers")
+      .exec();
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+    const subCustomers = customer.subCustomers;
+    const subCustomerResults = [];
+    for (const subCustomer of subCustomers) {
+      const loads = await LoadModel.find({
+        subContactInfo: subCustomer._id,
+      }).exec();
+      const totalPrice = loads.reduce((acc, load) => acc + (load.rate || 0), 0);
+      const monthlyAmounts = {};
+      for (const load of loads) {
+        const month = new Date(load.date).getMonth() + 1;
+        if (!monthlyAmounts[month]) {
+          monthlyAmounts[month] = 0;
+        }
+        monthlyAmounts[month] += load.rate || 0;
+      }
+      const amountPerMonth = Object.values(monthlyAmounts).reduce(
+        (acc, amount) => acc + amount,
+        0
+      );
+      const subCustomerResult = {
+        username: subCustomer.firstName + " " + subCustomer.lastName,
+        email: subCustomer.email,
+        amount: totalPrice,
+        amountPerMonth: amountPerMonth,
+      };
+      subCustomerResults.push(subCustomerResult);
+    }
 
-    const subCustomers = await SubCustomersModel.find({
-      parent: customerId,
-    }).exec();
+    return res.json(subCustomerResults);
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
-    const loadPromises = await subCustomers.map((subCustomer) =>
-      LoadModel.find({ subContactInfo: subCustomer._id }).exec()
+async function getSubCustomerStatistics(customerId) {
+  const statistics = await SubCustomer.aggregate([
+    {
+      $match: {
+        parent: mongoose.Types.ObjectId(customerId),
+      },
+    },
+    {
+      $group: {
+        _id: { $dayOfMonth: "$createdAt" },
+        subCustomerCount: { $sum: 1 },
+      },
+    },
+    {
+      $project: {
+        day: "$_id",
+        subCustomer: "$subCustomerCount",
+        _id: 0,
+      },
+    },
+  ]);
+
+  return statistics;
+}
+
+export const userStatistic = async (req, res) => {
+  try {
+    const subCustomers = await SubCustomersModel.find({ parent: req.userId });
+
+    // Group subCustomers by month and count them
+    const subCustomersByMonth = subCustomers.reduce((acc, subCustomer) => {
+      const day = moment(subCustomer.createdAt).date(); // Extract day from the date
+      const dateKey = moment(subCustomer.createdAt)
+        .startOf("month")
+        .format("YYYY-MM-DD");
+      acc[dateKey] = day; // Store the day of the month as the value
+      return acc;
+    }, {});
+
+    // Generate the desired data structure
+    const statistics = Object.entries(subCustomersByMonth).map(
+      ([date, day]) => ({ users: day || 0 })
     );
 
-    console.log(loadPromises);
+    // Ensure each month has 4 objects
+    const currentMonth = moment().format("YYYY-MM");
+    let lastMonth = moment().subtract(3, "months").format("YYYY-MM");
+    while (lastMonth < currentMonth) {
+      if (!subCustomersByMonth[lastMonth]) {
+        statistics.push({ users: 0 }); // Push an object with users: 0 if the month is missing
+      }
+      lastMonth = moment(lastMonth).add(1, "month").format("YYYY-MM");
+    }
 
-    res.json("ok");
+    // Return the statistics
+    console.log(statistics);
+    res.json(statistics);
   } catch (err) {
     console.log(err);
     res.status(500).json({
       message:
-        "Տեղի է ունեցել սխալ` գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
+        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
     });
   }
 };

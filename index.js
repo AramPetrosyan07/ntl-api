@@ -75,8 +75,9 @@ app.post(
 );
 
 app.post("/user/updateUser", checkAuth, UserController.updateUser);
-
 app.post("/user/UserSubs", checkAuth, UserController.getUserSubs);
+app.get("/user/statisticSalary", checkAuth, UserController.workersSalary);
+app.get("/user/statisticUser", checkAuth, UserController.userStatistic);
 
 // app.get("/customersInfo/CarrierSubs", checkAuth, UserController.getCarrierSubs);
 
@@ -113,8 +114,6 @@ app.get("/truck/get", TruckController.getTrucks);
 app.post("/truck/getUserTrucks", checkAuth, TruckController.getUserTrucks);
 app.post("/truck/updateTruck", checkAuth, TruckController.updateTruck);
 app.post("/truck/deleteTruck", checkAuth, TruckController.deleteTruck);
-
-app.post("/user/test", checkAuth, UserController.Test);
 
 app.listen(4000, (err) => {
   if (err) {
