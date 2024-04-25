@@ -76,8 +76,20 @@ app.post(
 
 app.post("/user/updateUser", checkAuth, UserController.updateUser);
 app.post("/user/UserSubs", checkAuth, UserController.getUserSubs);
+
 app.get("/user/statisticSalary", checkAuth, UserController.workersSalary);
 app.get("/user/statisticUser", checkAuth, UserController.userStatistic);
+app.get(
+  "/user/statisticLoadCount",
+  checkAuth,
+  UserController.loadCountStatistic
+);
+app.get(
+  "/user/statisticLoadPrice",
+  checkAuth,
+  UserController.loadPriceStatistic
+);
+app.get("/user/statisticLoad", checkAuth, UserController.loadStatistic);
 
 // app.get("/customersInfo/CarrierSubs", checkAuth, UserController.getCarrierSubs);
 

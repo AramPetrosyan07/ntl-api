@@ -14,6 +14,7 @@ import {
   sendMessageToMail,
 } from "../utils/NodeMailer.js";
 import { isValidPassword } from "../utils/handleValidationErrors.js";
+
 const { MongoServerError } = pkg;
 
 export const register = async (req, res) => {
@@ -621,63 +622,197 @@ export const workersSalary = async (req, res) => {
   }
 };
 
-async function getSubCustomerStatistics(customerId) {
-  const statistics = await SubCustomer.aggregate([
-    {
-      $match: {
-        parent: mongoose.Types.ObjectId(customerId),
-      },
-    },
-    {
-      $group: {
-        _id: { $dayOfMonth: "$createdAt" },
-        subCustomerCount: { $sum: 1 },
-      },
-    },
-    {
-      $project: {
-        day: "$_id",
-        subCustomer: "$subCustomerCount",
-        _id: 0,
-      },
-    },
-  ]);
-
-  return statistics;
-}
-
+// statistica
 export const userStatistic = async (req, res) => {
   try {
     const subCustomers = await SubCustomersModel.find({ parent: req.userId });
 
-    // Group subCustomers by month and count them
     const subCustomersByMonth = subCustomers.reduce((acc, subCustomer) => {
       const day = moment(subCustomer.createdAt).date(); // Extract day from the date
       const dateKey = moment(subCustomer.createdAt)
         .startOf("month")
         .format("YYYY-MM-DD");
-      acc[dateKey] = day; // Store the day of the month as the value
+      acc[dateKey] = day;
       return acc;
     }, {});
 
-    // Generate the desired data structure
     const statistics = Object.entries(subCustomersByMonth).map(
       ([date, day]) => ({ users: day || 0 })
     );
 
-    // Ensure each month has 4 objects
     const currentMonth = moment().format("YYYY-MM");
     let lastMonth = moment().subtract(3, "months").format("YYYY-MM");
     while (lastMonth < currentMonth) {
       if (!subCustomersByMonth[lastMonth]) {
-        statistics.push({ users: 0 }); // Push an object with users: 0 if the month is missing
+        statistics.push({ users: 0 });
       }
       lastMonth = moment(lastMonth).add(1, "month").format("YYYY-MM");
     }
 
-    // Return the statistics
     console.log(statistics);
     res.json(statistics);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message:
+        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
+    });
+  }
+};
+
+export const loadCountStatistic = async (req, res) => {
+  try {
+    const userId = req.userId; // Assuming userId is available in the request
+
+    const currentMonth = moment().startOf("month");
+    const months = Array.from({ length: 4 }, (_, i) =>
+      currentMonth.clone().subtract(i, "months")
+    );
+
+    const customerLoads = await LoadModel.find({
+      contactInfo: req.userId,
+      status: "paid",
+    });
+
+    const subCustomers = await SubCustomersModel.find({ parent: userId });
+    const subCustomerIds = subCustomers.map((subCustomer) => subCustomer._id);
+    const subCustomerLoads = await LoadModel.find({
+      subContactInfo: { $in: subCustomerIds },
+      status: "paid",
+    }).exec();
+
+    const loadCounts = {};
+    months.forEach((month) => {
+      loadCounts[month.format("DD.MM.YYYY")] = 0;
+    });
+
+    customerLoads.forEach((load) => {
+      const month = moment(load.createdAt)
+        .startOf("month")
+        .format("DD.MM.YYYY");
+      if (loadCounts.hasOwnProperty(month)) {
+        loadCounts[month]++;
+      }
+    });
+
+    subCustomerLoads.forEach((load) => {
+      const month = moment(load.createdAt)
+        .startOf("month")
+        .format("DD.MM.YYYY");
+      if (loadCounts.hasOwnProperty(month)) {
+        loadCounts[month]++;
+      }
+    });
+
+    const statistics = months.map((month) => ({
+      loadCount: loadCounts[month.format("DD.MM.YYYY")],
+    }));
+
+    console.log(statistics);
+    res.json(statistics);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message:
+        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
+    });
+  }
+};
+
+export const loadPriceStatistic = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const currentMonth = moment().startOf("month");
+    const months = Array.from({ length: 4 }, (_, i) =>
+      currentMonth.clone().subtract(i, "months")
+    );
+
+    const customerLoads = await LoadModel.find({
+      contactInfo: userId,
+      status: "paid",
+    }).select("rate createdAt");
+
+    const subCustomers = await SubCustomersModel.find({ parent: userId });
+    const subCustomerIds = subCustomers.map((subCustomer) => subCustomer._id);
+
+    const subCustomerLoads = await LoadModel.find({
+      subContactInfo: { $in: subCustomerIds },
+      status: "paid",
+    }).select("rate createdAt");
+    console.log(subCustomerLoads);
+
+    const loadPrices = Array.from({ length: 4 }, () => 0);
+
+    customerLoads.forEach((load) => {
+      const monthIndex = months.findIndex((month) =>
+        moment(load.createdAt).isSame(month, "month")
+      );
+      if (monthIndex !== -1) {
+        loadPrices[monthIndex] += load.rate || 0;
+      }
+    });
+
+    subCustomerLoads.forEach((load) => {
+      const monthIndex = months.findIndex((month) =>
+        moment(load.createdAt).isSame(month, "month")
+      );
+      if (monthIndex !== -1) {
+        loadPrices[monthIndex] += load.rate || 0;
+      }
+    });
+
+    const statistics = loadPrices.map((totalPrice) => ({ rate: totalPrice }));
+
+    res.json(statistics);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message:
+        "An error occurred while processing the request. Please try again later.",
+    });
+  }
+};
+
+//
+export const loadStatistic = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const customerLoads = await LoadModel.find({
+      contactInfo: userId,
+    }).select("status");
+
+    const subCustomers = await SubCustomersModel.find({ parent: userId });
+    const subCustomerIds = subCustomers.map((subCustomer) => subCustomer._id);
+
+    const subCustomerLoads = await LoadModel.find({
+      subContactInfo: { $in: subCustomerIds },
+    }).select("status");
+
+    const allLoads = [...customerLoads, ...subCustomerLoads];
+
+    let statistic = {
+      open: 0,
+      onRoad: 0,
+      delivered: 0,
+      paid: 0,
+    };
+
+    const statusMapping = {
+      open: "open",
+      onRoad: "onRoad",
+      delivered: "delivered",
+      paid: "paid",
+    };
+
+    allLoads.forEach((item) => {
+      const status = statusMapping[item.status];
+      if (status) {
+        statistic[status]++;
+      }
+    });
+
+    console.log(statistic);
+    res.json("");
   } catch (err) {
     console.log(err);
     res.status(500).json({
