@@ -91,6 +91,8 @@ app.get(
 );
 app.get("/user/statisticLoad", checkAuth, UserController.loadStatistic);
 
+app.get("/user/statistics", checkAuth, UserController.Statistics);
+
 // app.get("/customersInfo/CarrierSubs", checkAuth, UserController.getCarrierSubs);
 
 app.post("/customersInfo/removeSub", checkAuth, UserController.removeSub);
@@ -126,6 +128,32 @@ app.get("/truck/get", TruckController.getTrucks);
 app.post("/truck/getUserTrucks", checkAuth, TruckController.getUserTrucks);
 app.post("/truck/updateTruck", checkAuth, TruckController.updateTruck);
 app.post("/truck/deleteTruck", checkAuth, TruckController.deleteTruck);
+
+app.get(
+  "/notification/getNotification",
+  checkAuth,
+  UserController.getNotification
+);
+app.post(
+  "/notification/pinNotification",
+  checkAuth,
+  UserController.pinNotification
+);
+app.post(
+  "/notification/pinNotification",
+  checkAuth,
+  UserController.unpinNotification
+);
+app.post(
+  "/notification/openNotification",
+  checkAuth,
+  UserController.openNotification
+);
+app.post(
+  "/notification/deleteNotification",
+  checkAuth,
+  UserController.deleteNotification
+);
 
 app.listen(4000, (err) => {
   if (err) {

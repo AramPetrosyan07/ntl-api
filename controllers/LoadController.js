@@ -1,6 +1,10 @@
+import NotificationModel from "../modules/Notification.js";
 import LoadModel from "../modules/Load.js";
 import CustomersModel from "../modules/Customer.js";
+import CarrierModel from "../modules/Carrier.js";
 import SubCustomersModel from "../modules/SubCustomer.js";
+import { Types } from "mongoose";
+const { ObjectId } = Types;
 
 //addNewLoad          done      wwf  (work with front)
 //getLoads            done      wwf
@@ -221,11 +225,10 @@ export const deleteLoad = async (req, res) => {
 
 export const updateLoad = async (req, res) => {
   try {
-    let forCustomer = {
-      contactInfo: req.userId,
-    };
+    let forCustomer = {};
 
     const propertiesToUpdate = [
+      "_id",
       "date",
       "truckType",
       "type",
@@ -269,6 +272,43 @@ export const updateLoad = async (req, res) => {
       forCustomer,
       { new: true }
     );
+
+    if (req.body.status === "paid" && req.body.userType.includes("sub")) {
+      console.log("paid");
+      let load = await LoadModel.findOne({ _id: req.body.id }).exec();
+      const customer = await CustomersModel.findOne({
+        _id: load.contactInfo,
+      }).exec();
+
+      if (!customer) {
+        console.log("Customer not found");
+        return;
+      }
+
+      const notificationObject = await NotificationModel({
+        customer: load?.contactInfo.toString(),
+        subContact: load?.subContactInfo.toString(),
+        load: load?._id.toString(),
+      });
+
+      const notification = await notificationObject.save();
+
+      if (req.body.userType === "subCustomer") {
+        const updated = await CustomersModel.findOneAndUpdate(
+          { _id: load.contactInfo.toString() },
+          { $push: { notification: notification._id } }
+          // { new: true }
+        );
+      }
+      // else if (req.body.userType === "subCarrier") {
+      //   const updated = await CarrierModel.findOneAndUpdate(
+      //     { _id: load.contactInfo.toString() },
+      //     { $push: { notification: notification._id } }
+      //     // { new: true }
+      //   );
+      // }
+      console.log("yeeeeeeeeeeeeeeeeeeeeeee");
+    }
 
     res.json(response);
   } catch (err) {
