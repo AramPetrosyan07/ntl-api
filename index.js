@@ -77,21 +77,23 @@ app.post(
 app.post("/user/updateUser", checkAuth, UserController.updateUser);
 app.post("/user/UserSubs", checkAuth, UserController.getUserSubs);
 
-app.get("/user/statisticSalary", checkAuth, UserController.workersSalary);
-app.get("/user/statisticUser", checkAuth, UserController.userStatistic);
-app.get(
+//for test
+//{
+app.post("/user/statisticSalary", checkAuth, UserController.workersSalary);
+app.post("/user/statisticUser", checkAuth, UserController.userStatistic);
+app.post(
   "/user/statisticLoadCount",
   checkAuth,
   UserController.loadCountStatistic
 );
-app.get(
+app.post(
   "/user/statisticLoadPrice",
   checkAuth,
   UserController.loadPriceStatistic
 );
-app.get("/user/statisticLoad", checkAuth, UserController.loadStatistic);
-
-app.get("/user/statistics", checkAuth, UserController.Statistics);
+app.post("/user/statisticLoad", checkAuth, UserController.loadStatistic);
+//}
+app.post("/user/statistics", checkAuth, UserController.Statistics);
 
 // app.get("/customersInfo/CarrierSubs", checkAuth, UserController.getCarrierSubs);
 

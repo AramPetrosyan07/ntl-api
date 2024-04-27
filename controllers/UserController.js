@@ -6,7 +6,12 @@ import CustomersModel from "../modules/Customer.js";
 import SubCustomersModel from "../modules/SubCustomer.js";
 import SubCarrierModel from "../modules/SubCarrier.js";
 import CarrierModel from "../modules/Carrier.js";
-import { checkRegisterSubOptions } from "../utils/tools.js";
+import {
+  checkCountUsersByDate,
+  checkRegisterSubOptions,
+  loadPriceByDate,
+  perMonthDate,
+} from "../utils/tools.js";
 import RecoverModel from "../modules/RecoverPass.js";
 import pkg from "mongoose";
 import moment from "moment";
@@ -627,37 +632,36 @@ export const workersSalary = async (req, res) => {
 };
 
 export const userStatistic = async (req, res) => {
+  //count
   try {
-    const subCustomers = await SubCustomersModel.find({ parent: req.userId });
+    let subCustomers = null;
 
-    const subCustomersByMonth = subCustomers.reduce((acc, subCustomer) => {
-      const dateKey = moment(subCustomer.createdAt)
-        .startOf("month")
-        .format("YYYY-MM");
-      acc[dateKey] = (acc[dateKey] || 0) + 1;
-      return acc;
-    }, {});
-
-    const statistics = Object.entries(subCustomersByMonth).map(
-      ([date, count]) => ({
-        month: date,
-        users: count,
-      })
-    );
-
-    const currentMonth = moment().format("YYYY-MM");
-    let lastMonth = moment().subtract(3, "months").format("YYYY-MM");
-    while (lastMonth < currentMonth) {
-      if (!subCustomersByMonth[lastMonth]) {
-        statistics.push({ month: lastMonth, users: 0 });
-      }
-      lastMonth = moment(lastMonth).add(1, "month").format("YYYY-MM");
+    if (req.body.userType === "customer") {
+      subCustomers = await SubCustomersModel.find(
+        { parent: req.userId },
+        { createdAt: 1 }
+      );
+    } else if (req.body.userType === "carrier") {
+      subCustomers = await SubCustomersModel.find(
+        { _id: req.userId },
+        { createdAt: 1 }
+      );
+    } else if (req.body.userType === "subCustomer") {
+      subCustomers = await SubCarrierModel.find(
+        { parent: req.userId },
+        { createdAt: 1 }
+      );
+    } else if (req.body.userType === "subCarrier") {
+      subCustomers = await SubCarrierModel.find(
+        { _id: req.userId },
+        { createdAt: 1 }
+      );
     }
 
-    statistics.sort((a, b) => moment(a.month).diff(moment(b.month)));
+    const output = checkCountUsersByDate(subCustomers, "users");
 
-    // res.json(statistics);
-    return statistics;
+    // return output;
+    res.json(output);
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -669,55 +673,27 @@ export const userStatistic = async (req, res) => {
 
 export const loadCountStatistic = async (req, res) => {
   try {
-    const userId = req.userId; // Assuming userId is available in the request
-
-    const currentMonth = moment().startOf("month");
-    const months = Array.from({ length: 4 }, (_, i) =>
-      currentMonth.clone().subtract(i, "months")
-    );
-
-    const customerLoads = await LoadModel.find({
-      contactInfo: req.userId,
-      status: "paid",
-    });
-
-    const subCustomers = await SubCustomersModel.find({ parent: userId });
+    const subCustomers = await SubCustomersModel.find({ parent: req.userId });
     const subCustomerIds = subCustomers.map((subCustomer) => subCustomer._id);
-    const subCustomerLoads = await LoadModel.find({
-      subContactInfo: { $in: subCustomerIds },
-      status: "paid",
-    }).exec();
+    const subCustomerLoads = await LoadModel.find(
+      {
+        contactInfo: { $in: req.userId },
+        status: "paid",
+      },
+      { createdAt: 1 }
+    );
+    // const subCustomerLoads = await LoadModel.find(
+    //   {
+    //     subContactInfo: { $in: subCustomerIds },
+    //     status: "paid",
+    //   },
+    //   { createdAt: 1 }
+    // );
 
-    const loadCounts = {};
-    months.forEach((month) => {
-      loadCounts[month.format("DD.MM.YYYY")] = 0;
-    });
+    const output = checkCountUsersByDate(subCustomerLoads, "loadCount");
 
-    customerLoads.forEach((load) => {
-      const month = moment(load.createdAt)
-        .startOf("month")
-        .format("DD.MM.YYYY");
-      if (loadCounts.hasOwnProperty(month)) {
-        loadCounts[month]++;
-      }
-    });
-
-    subCustomerLoads.forEach((load) => {
-      const month = moment(load.createdAt)
-        .startOf("month")
-        .format("DD.MM.YYYY");
-      if (loadCounts.hasOwnProperty(month)) {
-        loadCounts[month]++;
-      }
-    });
-
-    const statistics = months.map((month) => ({
-      loadCount: loadCounts[month.format("DD.MM.YYYY")],
-    }));
-
-    // console.log(statistics);
-    // res.json(statistics);
-    return statistics.reverse();
+    return output;
+    // res.json("statistics");
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -730,49 +706,15 @@ export const loadCountStatistic = async (req, res) => {
 export const loadPriceStatistic = async (req, res) => {
   try {
     const userId = req.userId;
-    const currentMonth = moment().startOf("month");
-    const months = Array.from({ length: 4 }, (_, i) =>
-      currentMonth.clone().subtract(i, "months")
-    );
 
-    const customerLoads = await LoadModel.find({
+    const load = await LoadModel.find({
       contactInfo: userId,
       status: "paid",
     }).select("rate createdAt");
+    let output = loadPriceByDate(load, "rate");
 
-    const subCustomers = await SubCustomersModel.find({ parent: userId });
-    const subCustomerIds = subCustomers.map((subCustomer) => subCustomer._id);
-
-    const subCustomerLoads = await LoadModel.find({
-      subContactInfo: { $in: subCustomerIds },
-      status: "paid",
-    }).select("rate createdAt");
-    console.log(subCustomerLoads);
-
-    const loadPrices = Array.from({ length: 4 }, () => 0);
-
-    customerLoads.forEach((load) => {
-      const monthIndex = months.findIndex((month) =>
-        moment(load.createdAt).isSame(month, "month")
-      );
-      if (monthIndex !== -1) {
-        loadPrices[monthIndex] += load.rate || 0;
-      }
-    });
-
-    subCustomerLoads.forEach((load) => {
-      const monthIndex = months.findIndex((month) =>
-        moment(load.createdAt).isSame(month, "month")
-      );
-      if (monthIndex !== -1) {
-        loadPrices[monthIndex] += load.rate || 0;
-      }
-    });
-
-    const statistics = loadPrices.map((totalPrice) => ({ rate: totalPrice }));
-
-    // res.json(statistics);
-    return statistics.reverse();
+    // res.json(output);
+    return output;
   } catch (err) {
     console.error(err);
     res.status(500).json({
