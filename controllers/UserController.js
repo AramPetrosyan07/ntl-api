@@ -6,6 +6,8 @@ import CustomersModel from "../modules/Customer.js";
 import SubCustomersModel from "../modules/SubCustomer.js";
 import SubCarrierModel from "../modules/SubCarrier.js";
 import CarrierModel from "../modules/Carrier.js";
+import TruckModel from "../modules/Truck.js";
+
 import {
   checkCountUsersByDate,
   checkRegisterSubOptions,
@@ -586,23 +588,82 @@ export const changePass = async (req, res) => {
 
 // statistica
 // {
+// export const workersSalary = async (req, res) => {
+//   let customerId = req.userId;
+//   try {
+//     const customer = await CustomersModel.findById(customerId)
+//       .populate("subCustomers")
+//       .exec();
+//     if (!customer) {
+//       return res.status(404).json({ message: "Customer not found" });
+//     }
+//     const subCustomers = customer.subCustomers;
+//     const subCustomerResults = [];
+//     for (const subCustomer of subCustomers) {
+//       const loads = await LoadModel.find({
+//         subContactInfo: subCustomer._id,
+//       }).exec();
+//       const totalPrice = loads.reduce((acc, load) => acc + (load.rate || 0), 0);
+//       const monthlyAmounts = {};
+//       for (const load of loads) {
+//         const month = new Date(load.date).getMonth() + 1;
+//         if (!monthlyAmounts[month]) {
+//           monthlyAmounts[month] = 0;
+//         }
+//         monthlyAmounts[month] += load.rate || 0;
+//       }
+//       const amountPerMonth = Object.values(monthlyAmounts).reduce(
+//         (acc, amount) => acc + amount,
+//         0
+//       );
+//       const subCustomerResult = {
+//         username: subCustomer.firstName + " " + subCustomer.lastName,
+//         email: subCustomer.email,
+//         amount: totalPrice,
+//         amountPerMonth: amountPerMonth,
+//       };
+//       subCustomerResults.push(subCustomerResult);
+//     }
+
+//     // return res.json(subCustomerResults);
+//     return subCustomerResults;
+//   } catch (error) {
+//     console.error("Error:", error);
+//     return res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
 export const workersSalary = async (req, res) => {
-  let customerId = req.userId;
   try {
-    const customer = await CustomersModel.findById(customerId)
-      .populate("subCustomers")
-      .exec();
-    if (!customer) {
-      return res.status(404).json({ message: "Customer not found" });
+    let userId = req.userId;
+    let userType = req.body.userType;
+
+    let user;
+    if (userType === "customer") {
+      user = await CustomersModel.findById(userId)
+        .populate("subCustomers")
+        .exec();
+    } else if (userType === "carrier") {
+      user = await CarrierModel.findById(userId)
+        .populate("subCarrier trucks")
+        .exec();
     }
-    const subCustomers = customer.subCustomers;
-    const subCustomerResults = [];
-    for (const subCustomer of subCustomers) {
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const subEntities =
+      userType === "customer" ? user.subCustomers : user.subCarrier;
+    const subEntityResults = [];
+
+    for (const subEntity of subEntities) {
       const loads = await LoadModel.find({
-        subContactInfo: subCustomer._id,
+        subContactInfo: subEntity._id,
       }).exec();
       const totalPrice = loads.reduce((acc, load) => acc + (load.rate || 0), 0);
       const monthlyAmounts = {};
+
       for (const load of loads) {
         const month = new Date(load.date).getMonth() + 1;
         if (!monthlyAmounts[month]) {
@@ -610,21 +671,23 @@ export const workersSalary = async (req, res) => {
         }
         monthlyAmounts[month] += load.rate || 0;
       }
+
       const amountPerMonth = Object.values(monthlyAmounts).reduce(
         (acc, amount) => acc + amount,
         0
       );
-      const subCustomerResult = {
-        username: subCustomer.firstName + " " + subCustomer.lastName,
-        email: subCustomer.email,
+
+      const subEntityResult = {
+        username: subEntity.firstName + " " + subEntity.lastName,
+        email: subEntity.email,
         amount: totalPrice,
         amountPerMonth: amountPerMonth,
       };
-      subCustomerResults.push(subCustomerResult);
+
+      subEntityResults.push(subEntityResult);
     }
 
-    // return res.json(subCustomerResults);
-    return subCustomerResults;
+    return subEntityResults;
   } catch (error) {
     console.error("Error:", error);
     return res.status(500).json({ message: "Internal Server Error" });
@@ -635,7 +698,6 @@ export const userStatistic = async (req, res) => {
   //count
   try {
     let subCustomers = null;
-
     if (req.body.userType === "customer") {
       subCustomers = await SubCustomersModel.find(
         { parent: req.userId },
@@ -646,22 +708,12 @@ export const userStatistic = async (req, res) => {
         { _id: req.userId },
         { createdAt: 1 }
       );
-    } else if (req.body.userType === "subCustomer") {
-      subCustomers = await SubCarrierModel.find(
-        { parent: req.userId },
-        { createdAt: 1 }
-      );
-    } else if (req.body.userType === "subCarrier") {
-      subCustomers = await SubCarrierModel.find(
-        { _id: req.userId },
-        { createdAt: 1 }
-      );
     }
 
     const output = checkCountUsersByDate(subCustomers, "users");
 
-    // return output;
-    res.json(output);
+    // res.json(output);
+    return output;
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -673,15 +725,40 @@ export const userStatistic = async (req, res) => {
 
 export const loadCountStatistic = async (req, res) => {
   try {
-    const subCustomers = await SubCustomersModel.find({ parent: req.userId });
-    const subCustomerIds = subCustomers.map((subCustomer) => subCustomer._id);
-    const subCustomerLoads = await LoadModel.find(
-      {
-        contactInfo: { $in: req.userId },
-        status: "paid",
-      },
-      { createdAt: 1 }
-    );
+    let subCustomerLoads = null;
+    if (req.body.userType === "customer") {
+      subCustomerLoads = await LoadModel.find(
+        {
+          contactInfo: { $in: req.userId },
+          status: "paid",
+        },
+        { createdAt: 1 }
+      );
+    } else if (req.body.userType === "carrier") {
+      subCustomerLoads = await TruckModel.find(
+        {
+          contactInfo: { $in: req.userId },
+          status: "paid",
+        },
+        { createdAt: 1 }
+      );
+    } else if (req.body.userType === "subCustomer") {
+      subCustomerLoads = await LoadModel.find(
+        {
+          subContactInfo: { $in: req.userId },
+          status: "paid",
+        },
+        { createdAt: 1 }
+      );
+    } else if (req.body.userType === "subCarrier") {
+      subCustomerLoads = await TruckModel.find(
+        {
+          subContactInfo: { $in: req.userId },
+          status: "paid",
+        },
+        { createdAt: 1 }
+      );
+    }
     // const subCustomerLoads = await LoadModel.find(
     //   {
     //     subContactInfo: { $in: subCustomerIds },
@@ -692,8 +769,8 @@ export const loadCountStatistic = async (req, res) => {
 
     const output = checkCountUsersByDate(subCustomerLoads, "loadCount");
 
+    // res.json(output);
     return output;
-    // res.json("statistics");
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -707,10 +784,30 @@ export const loadPriceStatistic = async (req, res) => {
   try {
     const userId = req.userId;
 
-    const load = await LoadModel.find({
-      contactInfo: userId,
-      status: "paid",
-    }).select("rate createdAt");
+    let load = null;
+
+    if (req.body.userType === "customer") {
+      load = await LoadModel.find({
+        contactInfo: userId,
+        status: "paid",
+      }).select("rate createdAt");
+    } else if (req.body.userType === "carrier") {
+      load = await TruckModel.find({
+        contactInfo: userId,
+        status: "paid",
+      }).select("rate createdAt");
+    } else if (req.body.userType === "subCustomer") {
+      load = await LoadModel.find({
+        subContactInfo: userId,
+        status: "paid",
+      }).select("rate createdAt");
+    } else if (req.body.userType === "subCarrier") {
+      load = await TruckModel.find({
+        subContactInfo: userId,
+        status: "paid",
+      }).select("rate createdAt");
+    }
+
     let output = loadPriceByDate(load, "rate");
 
     // res.json(output);
@@ -727,18 +824,51 @@ export const loadPriceStatistic = async (req, res) => {
 export const loadStatistic = async (req, res) => {
   try {
     const userId = req.userId;
-    const customerLoads = await LoadModel.find({
-      contactInfo: userId,
-    }).select("status");
 
-    const subCustomers = await SubCustomersModel.find({ parent: userId });
-    const subCustomerIds = subCustomers.map((subCustomer) => subCustomer._id);
+    let mainUserItems = null;
+    let subUserItems = null;
 
-    const subCustomerLoads = await LoadModel.find({
-      subContactInfo: { $in: subCustomerIds },
-    }).select("status");
+    if (req.body.userType === "customer") {
+      mainUserItems = await LoadModel.find({
+        contactInfo: userId,
+      }).select("status");
 
-    const allLoads = [...customerLoads, ...subCustomerLoads];
+      const subCustomers = await SubCustomersModel.find({ parent: userId });
+      const subCustomerIds = subCustomers.map((subCustomer) => subCustomer._id);
+
+      subUserItems = await LoadModel.find({
+        subContactInfo: { $in: subCustomerIds },
+      }).select("status");
+    } else if (req.body.userType === "carrier") {
+      mainUserItems = await TruckModel.find({
+        contactInfo: userId,
+      }).select("status");
+
+      const subCarriers = await SubCarrierModel.find({ parent: userId });
+      const subCarrierIds = subCarriers.map((subCarrier) => subCarrier._id);
+
+      subUserItems = await TruckModel.find({
+        subContactInfo: { $in: subCarrierIds },
+      }).select("status");
+    } else if (req.body.userType === "subCustomer") {
+      mainUserItems = await LoadModel.find({
+        subContactInfo: userId,
+      }).select("status");
+    } else if (req.body.userType === "subCarrier") {
+      mainUserItems = await TruckModel.find({
+        subContactInfo: userId,
+      }).select("status");
+    }
+
+    const AllLoads = (mainUserItems, subUserItems) => {
+      if (mainUserItems && subUserItems) {
+        return [...mainUserItems, ...subUserItems];
+      } else if (!mainUserItems && subUserItems) {
+        return subUserItems;
+      } else if (mainUserItems && !subUserItems) {
+        return mainUserItems;
+      }
+    };
 
     let statistic = {
       open: 0,
@@ -754,14 +884,13 @@ export const loadStatistic = async (req, res) => {
       paid: "paid",
     };
 
-    allLoads.forEach((item) => {
+    AllLoads(mainUserItems, subUserItems).forEach((item) => {
       const status = statusMapping[item.status];
       if (status) {
         statistic[status]++;
       }
     });
 
-    // console.log(statistic);
     // res.json(statistic);
     return statistic;
   } catch (err) {
@@ -775,8 +904,14 @@ export const loadStatistic = async (req, res) => {
 
 export const Statistics = async (req, res) => {
   try {
-    let workers = await workersSalary(req, res);
-    let user = await userStatistic(req, res);
+    console.log(req.body);
+
+    let workers = null;
+    let user = null;
+    if (!req.body.userType.includes("sub")) {
+      workers = await workersSalary(req, res);
+      user = await userStatistic(req, res);
+    }
     let loadCount = await loadCountStatistic(req, res);
     let loadPrice = await loadPriceStatistic(req, res);
     let income = loadPrice.map((item) => {
@@ -788,14 +923,25 @@ export const Statistics = async (req, res) => {
     });
     let load = await loadStatistic(req, res);
 
-    let statistica = {
-      workers: workers,
-      user: user,
-      loadCount: loadCount,
-      loadPrice: loadPrice,
-      income: income,
-      loadStatistic: load,
-    };
+    let statistica = null;
+    if (!req.body.userType.includes("sub")) {
+      statistica = {
+        workers: workers,
+        user: user,
+        loadCount: loadCount,
+        loadPrice: loadPrice,
+        income: income,
+        loadStatistic: load,
+      };
+    } else {
+      statistica = {
+        loadCount: loadCount,
+        loadPrice: loadPrice,
+        income: income,
+        loadStatistic: load,
+      };
+    }
+
     console.log(statistica);
     res.json(statistica);
   } catch (err) {
