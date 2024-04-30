@@ -1,7 +1,6 @@
 import NotificationModel from "../modules/Notification.js";
 import LoadModel from "../modules/Load.js";
 import CustomersModel from "../modules/Customer.js";
-import CarrierModel from "../modules/Carrier.js";
 import SubCustomersModel from "../modules/SubCustomer.js";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
@@ -273,8 +272,7 @@ export const updateLoad = async (req, res) => {
       { new: true }
     );
 
-    if (req.body.status === "paid" && req.body.userType.includes("sub")) {
-      console.log("paid");
+    if (req.body.userType.includes("sub")) {
       let load = await LoadModel.findOne({ _id: req.body.id }).exec();
       const customer = await CustomersModel.findOne({
         _id: load.contactInfo,
@@ -297,17 +295,8 @@ export const updateLoad = async (req, res) => {
         const updated = await CustomersModel.findOneAndUpdate(
           { _id: load.contactInfo.toString() },
           { $push: { notification: notification._id } }
-          // { new: true }
         );
       }
-      // else if (req.body.userType === "subCarrier") {
-      //   const updated = await CarrierModel.findOneAndUpdate(
-      //     { _id: load.contactInfo.toString() },
-      //     { $push: { notification: notification._id } }
-      //     // { new: true }
-      //   );
-      // }
-      console.log("yeeeeeeeeeeeeeeeeeeeeeee");
     }
 
     res.json(response);

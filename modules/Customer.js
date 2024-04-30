@@ -55,10 +55,9 @@ const CustomersSchema = new mongoose.Schema(
       type: String,
       default: "Starter",
     },
-    notification: {
-      type: Array,
-      default: [],
-    },
+    notification: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Notification" },
+    ],
 
     isVeryfied: {
       type: Boolean,

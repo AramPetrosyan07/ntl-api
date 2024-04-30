@@ -12,18 +12,14 @@ import {
   checkCountUsersByDate,
   checkRegisterSubOptions,
   loadPriceByDate,
-  perMonthDate,
 } from "../utils/tools.js";
 import RecoverModel from "../modules/RecoverPass.js";
 import pkg from "mongoose";
-import moment from "moment";
 import {
   generateVerificationCode,
   sendMessageToMail,
 } from "../utils/NodeMailer.js";
 import { isValidPassword } from "../utils/handleValidationErrors.js";
-
-const { MongoServerError } = pkg;
 
 export const register = async (req, res) => {
   try {
@@ -586,53 +582,6 @@ export const changePass = async (req, res) => {
   }
 };
 
-// statistica
-// {
-// export const workersSalary = async (req, res) => {
-//   let customerId = req.userId;
-//   try {
-//     const customer = await CustomersModel.findById(customerId)
-//       .populate("subCustomers")
-//       .exec();
-//     if (!customer) {
-//       return res.status(404).json({ message: "Customer not found" });
-//     }
-//     const subCustomers = customer.subCustomers;
-//     const subCustomerResults = [];
-//     for (const subCustomer of subCustomers) {
-//       const loads = await LoadModel.find({
-//         subContactInfo: subCustomer._id,
-//       }).exec();
-//       const totalPrice = loads.reduce((acc, load) => acc + (load.rate || 0), 0);
-//       const monthlyAmounts = {};
-//       for (const load of loads) {
-//         const month = new Date(load.date).getMonth() + 1;
-//         if (!monthlyAmounts[month]) {
-//           monthlyAmounts[month] = 0;
-//         }
-//         monthlyAmounts[month] += load.rate || 0;
-//       }
-//       const amountPerMonth = Object.values(monthlyAmounts).reduce(
-//         (acc, amount) => acc + amount,
-//         0
-//       );
-//       const subCustomerResult = {
-//         username: subCustomer.firstName + " " + subCustomer.lastName,
-//         email: subCustomer.email,
-//         amount: totalPrice,
-//         amountPerMonth: amountPerMonth,
-//       };
-//       subCustomerResults.push(subCustomerResult);
-//     }
-
-//     // return res.json(subCustomerResults);
-//     return subCustomerResults;
-//   } catch (error) {
-//     console.error("Error:", error);
-//     return res.status(500).json({ message: "Internal Server Error" });
-//   }
-// };
-
 export const workersSalary = async (req, res) => {
   try {
     let userId = req.userId;
@@ -956,15 +905,29 @@ export const Statistics = async (req, res) => {
 
 export const getNotification = async (req, res) => {
   try {
-    let not = await NotificationModel.find({ customer: req.userId })
+    let not = await NotificationModel.find(
+      { customer: req.userId },
+      " -customer"
+    )
       .populate({
         path: "subContact",
         select: "firstName lastName",
       })
       .populate({
+        path: "subContactCarrier",
+        select: "firstName lastName",
+      })
+      .populate({
         path: "load",
-        select: "rate description pickup delivery commodity",
+        select: "rate description pickup delivery  commodity status",
+      })
+      .populate({
+        path: "truck",
+        select: "rate description pickup delivery  commodity status",
       });
+
+    console.log(not);
+    console.log("ok");
 
     res.json(not);
   } catch (err) {
@@ -976,13 +939,15 @@ export const getNotification = async (req, res) => {
   }
   7;
 };
+
 export const pinNotification = async (req, res) => {
   try {
     const updated = await NotificationModel.findOneAndUpdate(
       { _id: req.body.id },
-      { $set: { pin: true } },
+      { $set: { pin: !req.body.pin } },
       { new: true }
     );
+
     console.log(updated);
     res.json("ok");
   } catch (err) {
@@ -994,24 +959,7 @@ export const pinNotification = async (req, res) => {
   }
   7;
 };
-export const unpinNotification = async (req, res) => {
-  try {
-    const updated = await NotificationModel.findOneAndUpdate(
-      { _id: req.body.id },
-      { $set: { pin: false } },
-      { new: true }
-    );
-    console.log(updated);
-    res.json("ok");
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      message:
-        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
-    });
-  }
-  7;
-};
+
 export const openNotification = async (req, res) => {
   try {
     const updated = await NotificationModel.findOneAndUpdate(
@@ -1030,19 +978,30 @@ export const openNotification = async (req, res) => {
   }
   7;
 };
+
 export const deleteNotification = async (req, res) => {
   try {
+    console.log(req.body);
     const response = await NotificationModel.findOneAndDelete({
       _id: req.body.id,
     });
 
-    const updatedSubCustomer = await CustomersModel.findOneAndUpdate(
+    let MODEL = null;
+    if (req.body.userType === "customer") {
+      MODEL = CustomersModel;
+    } else if (req.body.userType === "carrier") {
+      MODEL = CarrierModel;
+    }
+
+    const updatedSubCustomer = await MODEL.findOneAndUpdate(
       { _id: req.userId },
       { $pull: { notification: req.body.id } },
       { new: true }
     );
 
-    res.json("ok");
+    console.log(updatedSubCustomer);
+
+    res.json(updatedSubCustomer);
   } catch (err) {
     console.log(err);
     res.status(500).json({

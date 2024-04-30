@@ -1,6 +1,7 @@
 import TruckModel from "../modules/Truck.js";
 import CarrierModel from "../modules/Carrier.js";
 import SubCarrierModel from "../modules/SubCarrier.js";
+import NotificationModel from "../modules/Notification.js";
 
 //addTruck
 //getTrucks
@@ -214,9 +215,7 @@ export const deleteTruck = async (req, res) => {
 
 export const updateTruck = async (req, res) => {
   try {
-    let forCarrier = {
-      contactInfo: req.userId,
-    };
+    let forCarrier = {};
 
     const propertiesToUpdate = [
       "date",
@@ -260,13 +259,41 @@ export const updateTruck = async (req, res) => {
       forCarrier.delivery = {}; // Reset delivery value to empty object
     }
 
-    let response = await TruckModel.findOneAndUpdate(
+    let truck = await TruckModel.findOneAndUpdate(
       { _id: req.body.id },
       forCarrier,
       { new: true }
     );
 
-    res.json(response);
+    if (req.body.userType.includes("sub")) {
+      console.log("truck");
+      let truck = await TruckModel.findOne({ _id: req.body.id }).exec();
+      const carrier = await CarrierModel.findOne({
+        _id: truck.contactInfo,
+      }).exec();
+
+      if (!carrier) {
+        console.log("Carrier not found");
+        return;
+      }
+
+      const notificationObject = await NotificationModel({
+        customer: truck?.contactInfo.toString(),
+        subContactCarrier: truck?.subContactInfo.toString(),
+        truck: truck?._id.toString(),
+      });
+
+      const notification = await notificationObject.save();
+
+      if (req.body.userType === "subCarrier") {
+        const updated = await CarrierModel.findOneAndUpdate(
+          { _id: truck.contactInfo.toString() },
+          { $push: { notification: notification._id } }
+        );
+      }
+    }
+
+    res.json(truck);
   } catch (err) {
     console.log(err);
     res.status(500).json({

@@ -142,11 +142,6 @@ app.post(
   UserController.pinNotification
 );
 app.post(
-  "/notification/pinNotification",
-  checkAuth,
-  UserController.unpinNotification
-);
-app.post(
   "/notification/openNotification",
   checkAuth,
   UserController.openNotification

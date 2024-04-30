@@ -20,6 +20,9 @@ const CarrierSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
     },
+    notification: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Notification" },
+    ],
     userType: {
       type: String,
       required: true,
