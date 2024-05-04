@@ -124,7 +124,11 @@ export const getLoads = async (req, res) => {
         select: "email phoneNumber",
       });
 
-    res.json(allLoad);
+    if (allLoad.length) {
+      res.json(allLoad);
+    } else {
+      res.json("Բեռ չի գտնվել");
+    }
   } catch (err) {
     console.log(err);
     res.status(500).json({

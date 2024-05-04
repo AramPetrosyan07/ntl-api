@@ -228,54 +228,105 @@ export const updateUser = async (req, res) => {
   }
 };
 
+// export const login = async (req, res) => {
+//   try {
+//     let user = null;
+//     const userTypeModels = new Map([
+//       ["customer", CustomersModel],
+//       ["carrier", CarrierModel],
+//       ["subCustomer", SubCustomersModel],
+//       ["subCarrier", SubCarrierModel],
+//     ]);
+
+//     user = await getData(
+//       userTypeModels.get(req.body.userType),
+//       req.body.userType
+//     );
+//     console.log(req.body);
+//     console.log(userTypeModels.get(req.body.userType));
+
+//     async function getData(MODEL, type) {
+//       if (!type.toLowerCase().includes("sub")) {
+//         user = await MODEL.findOne({ email: req.body.email });
+//       } else {
+//         user = await MODEL.findOne({ email: req.body.email }).populate({
+//           path: "parent",
+//           select:
+//             "companyName address website paymentType paymentDuration about",
+//         });
+//       }
+//     }
+
+//     if (!user) {
+//       return res.status(404).json({ message: "Սխալ էլ. հասցե կամ գաղտնաբառ" });
+//     }
+
+//     const isValidPass = await bcrypt.compare(
+//       req.body.password,
+//       user._doc.passwordHash
+//     );
+
+//     if (!isValidPass) {
+//       return res.status(403).json({
+//         message: "Սխալ էլ. հասցե կամ գաղտնաբառ",
+//       });
+//     }
+
+//     const token = jwt.sign({ _id: user._id }, "secret123", { expiresIn: "4d" });
+//     const { passwordHash, ...userData } = user._doc;
+
+//     res.json({
+//       ...userData,
+//       token,
+//     });
+//     //update
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({
+//       message:
+//         "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
+//     });
+//   }
+// };
+
 export const login = async (req, res) => {
   try {
     let user = null;
-    if (req.body.userType === "customer") {
-      await getData(CustomersModel, "customer");
-    } else if (req.body.userType === "carrier") {
-      await getData(CarrierModel, "carrier");
-    } else if (req.body.userType === "subCustomer") {
-      await getData(SubCustomersModel, "subCustomer");
-    } else if (req.body.userType === "subCarrier") {
-      await getData(SubCarrierModel, "subCarrier");
-    }
 
-    if (!user) {
-      user = await CustomersModel.findOne({ email: req.body.email });
-    } else if (!user) {
-      user = await CarrierModel.findOne({ email: req.body.email });
-    } else if (!user) {
-      user = await SubCustomersModel.findOne({ email: req.body.email });
-    } else if (!user) {
-      user = await SubCarrierModel.findOne({ email: req.body.email });
-    }
+    const userTypeModels = new Map([
+      ["customer", CustomersModel],
+      ["carrier", CarrierModel],
+      ["subCustomer", SubCustomersModel],
+      ["subCarrier", SubCarrierModel],
+    ]);
 
-    async function getData(MODEL, type) {
-      if (!type.toLowerCase().includes("sub")) {
-        user = await MODEL.findOne({ email: req.body.email });
+    user = await getData(userTypeModels.get(req.body.userType), req.body);
+
+    async function getData(model, { userType, email }) {
+      let user;
+      if (!userType.toLowerCase().includes("sub")) {
+        user = await model.findOne({ email });
       } else {
-        user = await MODEL.findOne({ email: req.body.email }).populate({
+        user = await model.findOne({ email }).populate({
           path: "parent",
           select:
             "companyName address website paymentType paymentDuration about",
         });
       }
+      return user;
     }
 
     if (!user) {
-      return res.status(404).json({ message: "Սխալ էլ. հասցե կամ գաղտնաբառ" });
+      return res.status(404).json({ message: "Incorrect email or password." });
     }
 
     const isValidPass = await bcrypt.compare(
       req.body.password,
-      user._doc.passwordHash
+      user.passwordHash
     );
 
     if (!isValidPass) {
-      return res.status(403).json({
-        message: "Սխալ էլ. հասցե կամ գաղտնաբառ",
-      });
+      return res.status(403).json({ message: "Incorrect email or password." });
     }
 
     const token = jwt.sign({ _id: user._id }, "secret123", { expiresIn: "4d" });
@@ -285,12 +336,11 @@ export const login = async (req, res) => {
       ...userData,
       token,
     });
-    //update
   } catch (err) {
     console.log(err);
     res.status(500).json({
       message:
-        "Տեղի է ունեցել սխալ գործողության ընդացքում, խնդրում ենք փորձել մի փոքր ուշ",
+        "An error occurred while processing your request. Please try again later.",
     });
   }
 };
