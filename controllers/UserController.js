@@ -14,7 +14,6 @@ import {
   loadPriceByDate,
 } from "../utils/tools.js";
 import RecoverModel from "../modules/RecoverPass.js";
-import pkg from "mongoose";
 import {
   generateVerificationCode,
   sendMessageToMail,
@@ -23,17 +22,15 @@ import { isValidPassword } from "../utils/handleValidationErrors.js";
 
 export const register = async (req, res) => {
   try {
+    let UserModel;
     if (req.body.userType === "customer") {
-      const hasEmail = await SubCustomersModel.findOne({
-        email: req.body.email,
-      });
-      if (hasEmail) {
-        return res
-          .status(404)
-          .json({ message: "Այս էլ. հասցեով օգտատեր գոյություն ունի" });
-      }
+      UserModel = SubCustomersModel;
     } else if (req.body.userType === "carrier") {
-      const hasEmail = await SubCarrierModel.findOne({
+      UserModel = SubCarrierModel;
+    }
+
+    if (UserModel) {
+      const hasEmail = await UserModel.findOne({
         email: req.body.email,
       });
       if (hasEmail) {
