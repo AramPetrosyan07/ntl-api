@@ -1,10 +1,10 @@
-import LoadModel from "../modules/Load.js";
+import LoadModel from "../models/Load.js";
 
-import CustomersModel from "../modules/Customer.js";
-import SubCustomersModel from "../modules/SubCustomer.js";
-import SubCarrierModel from "../modules/SubCarrier.js";
-import CarrierModel from "../modules/Carrier.js";
-import TruckModel from "../modules/Truck.js";
+import CustomersModel from "../models/Customer.js";
+import SubCustomersModel from "../models/SubCustomer.js";
+import SubCarrierModel from "../models/SubCarrier.js";
+import CarrierModel from "../models/Carrier.js";
+import TruckModel from "../models/Truck.js";
 
 import { checkCountUsersByDate, loadPriceByDate } from "../utils/tools.js";
 

@@ -1,7 +1,7 @@
-import NotificationModel from "../modules/Notification.js";
-import LoadModel from "../modules/Load.js";
-import CustomersModel from "../modules/Customer.js";
-import SubCustomersModel from "../modules/SubCustomer.js";
+import NotificationModel from "../models/Notification.js";
+import LoadModel from "../models/Load.js";
+import CustomersModel from "../models/Customer.js";
+import SubCustomersModel from "../models/SubCustomer.js";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 
@@ -14,9 +14,8 @@ const { ObjectId } = Types;
 
 export const addNewLoad = async (req, res) => {
   try {
+    req.body;
 
-    req.body
-    
     // console.log(req.body);
     let isSubUser = req.body.userType === "subCustomer";
 

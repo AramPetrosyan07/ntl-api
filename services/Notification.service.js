@@ -1,6 +1,6 @@
-import NotificationModel from "../modules/Notification.js";
-import CustomersModel from "../modules/Customer.js";
-import CarrierModel from "../modules/Carrier.js";
+import NotificationModel from "../models/Notification.js";
+import CustomersModel from "../models/Customer.js";
+import CarrierModel from "../models/Carrier.js";
 
 export const getNotification = async (req, res) => {
   try {

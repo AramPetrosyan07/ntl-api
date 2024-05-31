@@ -1,10 +1,10 @@
 import nodemailer from "nodemailer";
-import RecoverModel from "../modules/RecoverPass.js";
+import RecoverModel from "../models/RecoverPass.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import CustomersModel from "../modules/Customer.js";
-import SubCustomersModel from "../modules/SubCustomer.js";
-import DriverModel from "../modules/Carrier.js";
+import CustomersModel from "../models/Customer.js";
+import SubCustomersModel from "../models/SubCustomer.js";
+import DriverModel from "../models/Carrier.js";
 
 export const mailTransporter = nodemailer.createTransport({
   host: "smtp.gmail.email",

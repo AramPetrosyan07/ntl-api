@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import CustomersModel from "../modules/Customer.js";
-import SubCustomersModel from "../modules/SubCustomer.js";
-import SubCarrierModel from "../modules/SubCarrier.js";
-import CarrierModel from "../modules/Carrier.js";
+import CustomersModel from "../models/Customer.js";
+import SubCustomersModel from "../models/SubCustomer.js";
+import SubCarrierModel from "../models/SubCarrier.js";
+import CarrierModel from "../models/Carrier.js";
 import { isValidPassword } from "../utils/handleValidationErrors.js";
 
 export const updateUser = async (req, res) => {

@@ -1,7 +1,7 @@
-import TruckModel from "../modules/Truck.js";
-import CarrierModel from "../modules/Carrier.js";
-import SubCarrierModel from "../modules/SubCarrier.js";
-import NotificationModel from "../modules/Notification.js";
+import TruckModel from "../models/Truck.js";
+import CarrierModel from "../models/Carrier.js";
+import SubCarrierModel from "../models/SubCarrier.js";
+import NotificationModel from "../models/Notification.js";
 
 //addTruck
 //getTrucks
