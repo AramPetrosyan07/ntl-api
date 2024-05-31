@@ -46,16 +46,6 @@ export const perMonthDate = () => {
 };
 
 export const checkCountUsersByDate = (data, key) => {
-  //   const data = [
-  //     {
-  //         "_id": "6627f3878dcf6915aabe36c2",
-  //         "createdAt": "2024-04-26T17:44:39.748Z"
-  //     },
-  //     {
-  //         "_id": "6628043868c396519a1751e8",
-  //         "createdAt": "2024-04-23T18:55:52.428Z"
-  //     }
-  // ];
   const output = [];
 
   for (let date of perMonthDate()) {
