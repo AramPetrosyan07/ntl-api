@@ -14,6 +14,9 @@ const { ObjectId } = Types;
 
 export const addNewLoad = async (req, res) => {
   try {
+
+    req.body
+    
     // console.log(req.body);
     let isSubUser = req.body.userType === "subCustomer";
 

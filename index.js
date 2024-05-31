@@ -2,8 +2,12 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import "dotenv/config";
-import * as UserController from "./controllers/UserController.js";
-import * as LoadController from "./controllers/LoadController.js";
+import * as Notification from "./services/Notification.service.js";
+import * as Statustic from "./services/Statistic.service.js";
+import * as LoadController from "./services/Load.service.js";
+import * as Auth from "./services/Auth.service.js";
+import * as User from "./services/User.service.js";
+import * as SubCustomer from "./services/SubCustomer.service.js";
 import * as TruckController from "./controllers/TruckController.js";
 import handleValidationErrors from "./utils/handleValidationErrors.js";
 import {
@@ -29,77 +33,52 @@ mongoose
 
 const app = express();
 app.use(cors());
-
 app.use(express.json());
-
-app.get("/test", async (req, res) => {
-  try {
-    res.json("working");
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      message: "Не удалось авторизаваться",
-    });
-  }
-});
 
 app.post(
   "/auth/register",
   registerValidation,
   handleValidationErrors,
-  UserController.register
+  Auth.register
 );
-
-app.post(
-  "/auth/login",
-  loginValidation,
-  handleValidationErrors,
-  UserController.login
-);
-
+app.post("/auth/login", loginValidation, handleValidationErrors, Auth.login);
 app.post(
   "/auth/changePass",
   changePassValidation,
   handleValidationErrors,
-  UserController.changePass
+  Auth.changePass
+);
+app.post("/auth/me", checkAuth, Auth.getMe);
+app.post("/auth/registerSub", checkAuth, Auth.registerSub);
+
+app.post("/user/updateUser", checkAuth, User.updateUser);
+app.post("/user/UserSubs", checkAuth, User.getUserSubs);
+app.post(
+  "/user/changePassword",
+  checkAuth,
+  sendValidation,
+  handleValidationErrors,
+  User.changePass
 );
 
-app.post("/auth/me", checkAuth, UserController.getMe);
-
+app.post("/statistic/statisticSalary", checkAuth, Statustic.workersSalary);
+app.post("/statistic/statisticUser", checkAuth, Statustic.userStatistic);
 app.post(
-  "/auth/registerSub",
+  "/statistic/statisticLoadCount",
   checkAuth,
-  // registerValidation,
-  // handleValidationErrors,
-  UserController.registerSub
-);
-
-app.post("/user/updateUser", checkAuth, UserController.updateUser);
-app.post("/user/UserSubs", checkAuth, UserController.getUserSubs);
-
-//for test
-//{
-app.post("/user/statisticSalary", checkAuth, UserController.workersSalary);
-app.post("/user/statisticUser", checkAuth, UserController.userStatistic);
-app.post(
-  "/user/statisticLoadCount",
-  checkAuth,
-  UserController.loadCountStatistic
+  Statustic.loadCountStatistic
 );
 app.post(
-  "/user/statisticLoadPrice",
+  "/statistic/statisticLoadPrice",
   checkAuth,
-  UserController.loadPriceStatistic
+  Statustic.loadPriceStatistic
 );
-app.post("/user/statisticLoad", checkAuth, UserController.loadStatistic);
-//}
-app.post("/user/statistics", checkAuth, UserController.Statistics);
+app.post("/statistic/statisticLoad", checkAuth, Statustic.loadStatistic);
+app.post("/statistic/statistics", checkAuth, Statustic.Statistics);
 
-// app.get("/customersInfo/CarrierSubs", checkAuth, UserController.getCarrierSubs);
+app.post("/customersInfo/removeSub", checkAuth, SubCustomer.removeSub);
 
-app.post("/customersInfo/removeSub", checkAuth, UserController.removeSub);
-
-app.post("/customersInfo/getDetailSub", checkAuth, UserController.getDetailSub);
+app.post("/customersInfo/getDetailSub", checkAuth, SubCustomer.getDetailSub);
 
 app.post("/load/add", checkAuth, LoadController.addNewLoad);
 app.get("/load/get", LoadController.getLoads);
@@ -107,14 +86,6 @@ app.post("/load/getUserLoads", checkAuth, LoadController.getUserLoads);
 app.post("/load/getDetail", LoadController.getDetailLoad);
 app.post("/load/updateLoad", checkAuth, LoadController.updateLoad);
 app.post("/load/deleteLoad", checkAuth, LoadController.deleteLoad);
-
-app.post(
-  "/changePassword",
-  checkAuth,
-  sendValidation,
-  handleValidationErrors,
-  UserController.changePass
-);
 
 app.post("/recover/send", sendValidation, handleValidationErrors, RecoverSend);
 app.post("/recover/response", RecoverResponse);
@@ -134,22 +105,22 @@ app.post("/truck/deleteTruck", checkAuth, TruckController.deleteTruck);
 app.get(
   "/notification/getNotification",
   checkAuth,
-  UserController.getNotification
+  Notification.getNotification
 );
 app.post(
   "/notification/pinNotification",
   checkAuth,
-  UserController.pinNotification
+  Notification.pinNotification
 );
 app.post(
   "/notification/openNotification",
   checkAuth,
-  UserController.openNotification
+  Notification.openNotification
 );
 app.post(
   "/notification/deleteNotification",
   checkAuth,
-  UserController.deleteNotification
+  Notification.deleteNotification
 );
 
 app.listen(4000, (err) => {
