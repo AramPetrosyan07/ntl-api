@@ -38,39 +38,6 @@ export function generateVerificationCode() {
   return Math.floor(100000 + Math.random() * 900000);
 }
 
-// export const changePassword = async (req, res) => {
-//   try {
-//     console.log(req.body);
-
-//     let User = null;
-//     if (req.body.userType === "customer") {
-//       User = CustomersModel
-//     } else if (req.body.userType === "carrier") {
-//       User = CarrierModel
-//     } else if (req.body.userType === "subCustomer") {
-//       User = SubCustomersModel
-//     } else if (req.body.userType === "subCarrier") {
-//       User = SubCarrierModel
-//     }
-
-//       User.findOne({ email: req.body.email });
-
-//     // const verificationCode = generateVerificationCode();
-
-//     // sendMessageToMail({
-//     //   email: email,
-//     //   verifyCode: verificationCode,
-//     // });
-
-//     // res.json("Email send");
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json({
-//       message: "RecoverSend error",
-//     });
-//   }
-// };
-
 export const RecoverSend = async (req, res) => {
   try {
     const { email } = req.body;

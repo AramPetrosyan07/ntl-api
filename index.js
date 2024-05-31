@@ -8,7 +8,7 @@ import * as LoadController from "./services/Load.service.js";
 import * as Auth from "./services/Auth.service.js";
 import * as User from "./services/User.service.js";
 import * as SubCustomer from "./services/SubCustomer.service.js";
-import * as TruckController from "./controllers/TruckController.js";
+import * as TruckController from "./services/Truck.service.js";
 import handleValidationErrors from "./utils/handleValidationErrors.js";
 import {
   registerValidation,
@@ -24,7 +24,7 @@ import {
   RecoverResponse,
   RecoverSend,
   SendCodeToMail,
-} from "./utils/NodeMailer.js";
+} from "./services/NodeMailer.service.js";
 
 mongoose
   .connect(process.env.MONGO_KEY)

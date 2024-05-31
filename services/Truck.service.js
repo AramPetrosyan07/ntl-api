@@ -146,27 +146,6 @@ export const getUserTrucks = async (req, res) => {
   }
 };
 
-// export const getDetailTruck = async (req, res) => {
-//   try {
-//     const allLoad = await TruckModel.findOne({ _id: req.body.id })
-//       .populate({
-//         path: "contactInfo",
-//         select: "companyName email phoneNumber",
-//       })
-//       .populate({
-//         path: "subContactInfo",
-//         select: "email phoneNumber",
-//       });
-
-//     res.json(allLoad);
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json({
-//       message: "Не",
-//     });
-//   }
-// };
-
 export const deleteTruck = async (req, res) => {
   try {
     const oneLoad = await TruckModel.findOne({ _id: req.body.id });
